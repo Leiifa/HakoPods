@@ -420,7 +420,16 @@ public partial class App : System.Windows.Application
 
         _hfpUp = false;
         _captureIdleSince = DateTimeOffset.MinValue;
-        _ = Task.Run(() => _connection.DisableHandsFreeAsync(address));
+        _ = Task.Run(async () =>
+        {
+            await _connection.DisableHandsFreeAsync(address).ConfigureAwait(false);
+
+            // The stream wedges when the profile flips: routing is correct (endpoint present,
+            // default set, device connected) yet nothing plays. Cycling A2DP rebuilds the endpoint
+            // and the stream with it. This belongs only here — on the connect path it would tear
+            // down the endpoint the user is listening on.
+            await _connection.CycleA2dpAsync(address).ConfigureAwait(false);
+        });
     }
 
     private void PollConnection()
