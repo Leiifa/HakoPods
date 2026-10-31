@@ -23,6 +23,7 @@ public sealed class LiveStateFeed : IAsyncDisposable
     private CancellationTokenSource? _cancellation;
     private DeviceState _state = DeviceState.Empty;
     private DateTimeOffset _lastSampleAt = DateTimeOffset.MinValue;
+    private int _restartsSinceSample;
     private bool _disposed;
 
     public LiveStateFeed(ulong? address, Dispatcher dispatcher, int nearThresholdDbm = -72)
@@ -84,8 +85,12 @@ public sealed class LiveStateFeed : IAsyncDisposable
     /// machine waking from sleep does not always produce that callback — the radio comes back
     /// without anyone noticing. Resuming is the one case that must be forced.
     /// </summary>
+    /// <summary>Revivals attempted since the last advertisement. Two means the watcher is not coming back.</summary>
+    public int RestartsSinceLastSample => _restartsSinceSample;
+
     public void Restart()
     {
+        _restartsSinceSample++;
         if (_disposed)
         {
             return;
@@ -176,6 +181,7 @@ public sealed class LiveStateFeed : IAsyncDisposable
     {
         _state = next;
         _lastSampleAt = DateTimeOffset.UtcNow;
+        _restartsSinceSample = 0;
         StateChanged?.Invoke(this, next);
     }
 }

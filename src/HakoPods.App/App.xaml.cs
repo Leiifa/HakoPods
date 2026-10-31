@@ -25,6 +25,7 @@ public partial class App : System.Windows.Application
     private bool? _anyInEar;
     private DateTimeOffset? _earCandidateAt;
     private bool _revertedUnworn;
+    private DateTimeOffset _lastRelaunch = DateTimeOffset.MinValue;
     private string? _previousEndpoint;
     private TrayIconHost? _tray;
     private PopupWindow? _popup;
@@ -223,6 +224,31 @@ public partial class App : System.Windows.Application
     /// and silent when no endpoint has been learned yet — better no routing than routing to a
     /// stale id that Windows has since re-numbered.
     /// </summary>
+    /// <summary>
+    /// Starts a new copy of this exe and exits. The single-instance mutex means the new process
+    /// takes over the tray cleanly once this one lets go.
+    /// </summary>
+    private void Relaunch()
+    {
+        try
+        {
+            if (Environment.ProcessPath is { } exe)
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(exe)
+                {
+                    UseShellExecute = true,
+                });
+            }
+        }
+        catch (Exception)
+        {
+            // If the relaunch cannot start, staying alive is better than vanishing.
+            return;
+        }
+
+        Shutdown();
+    }
+
     private void OnPowerModeChanged(object sender, Microsoft.Win32.PowerModeChangedEventArgs e)
     {
         if (e.Mode != Microsoft.Win32.PowerModes.Resume)
@@ -247,6 +273,17 @@ public partial class App : System.Windows.Application
     private void PollConnection()
     {
         _feed?.EnsureAlive();
+
+        // In-process revival is unproven after a radio toggle; a fresh process is not. Two failed
+        // revivals mean give up on the watcher and hand over, at most once every ten minutes so a
+        // genuinely broken environment cannot become a relaunch loop.
+        if (_feed is not null && _feed.RestartsSinceLastSample >= 2
+            && DateTimeOffset.UtcNow - _lastRelaunch > TimeSpan.FromMinutes(10))
+        {
+            _lastRelaunch = DateTimeOffset.UtcNow;
+            Relaunch();
+            return;
+        }
 
         var connected = IsConnected();
 
