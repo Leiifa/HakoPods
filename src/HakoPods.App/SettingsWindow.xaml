@@ -1,0 +1,40 @@
+<Window x:Class="HakoPods.App.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="HakoPods settings"
+        Width="460" Height="420"
+        WindowStartupLocation="CenterScreen"
+        FontFamily="{StaticResource InterFont}"
+        Background="#F7F7F9"
+        ShowInTaskbar="True">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,12">
+            <TextBlock Text="Playback device" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Text="Pick the device HakoPods should switch to when your AirPods connect."
+                       FontSize="12" Foreground="#6E6E73" Margin="0,2,0,0" TextWrapping="Wrap" />
+        </StackPanel>
+
+        <ListBox x:Name="EndpointList" Grid.Row="1" DisplayMemberPath="Display" />
+
+        <StackPanel Grid.Row="2" Margin="0,14,0,0">
+            <CheckBox x:Name="SwitchAudio" Content="Switch playback automatically on connect"
+                      FontSize="13" Margin="0,0,0,8" />
+            <CheckBox x:Name="StartWithWindows" Content="Start with Windows"
+                      FontSize="13" Margin="0,0,0,8" />
+            <CheckBox x:Name="AutoConnect" Content="Connect when the lid opens"
+                      FontSize="13" Margin="0,0,0,14" />
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel" Width="88" Height="30" Margin="0,0,8,0" IsCancel="True" />
+                <Button Content="Save" Width="88" Height="30" IsDefault="True" Click="OnSave" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

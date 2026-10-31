@@ -53,7 +53,7 @@ public sealed class TrayIconHost : IDisposable
 
         _connectItem.Click += async (_, _) => await RunConnectionAsync(connect: true);
         _disconnectItem.Click += async (_, _) => await RunConnectionAsync(connect: false);
-        settingsItem.Click += (_, _) => ShowPlaceholder("Settings arrive with APW-301.");
+        settingsItem.Click += (_, _) => SettingsRequested?.Invoke(this, EventArgs.Empty);
         quitItem.Click += (_, _) => QuitRequested?.Invoke(this, EventArgs.Empty);
 
         var items = new List<ToolStripItem> { _statusItem, new ToolStripSeparator(), _connectItem, _disconnectItem };
@@ -93,6 +93,8 @@ public sealed class TrayIconHost : IDisposable
     }
 
     public event EventHandler? QuitRequested;
+
+    public event EventHandler? SettingsRequested;
 
     public event EventHandler<DeviceState>? PopupRequested;
 

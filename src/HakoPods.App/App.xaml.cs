@@ -17,6 +17,7 @@ public partial class App : System.Windows.Application
     private Mutex? _singleInstance;
     private ulong? _address;
     private AppSettings _settings = new();
+    private JsonSettingsStore? _store;
     private TrayIconHost? _tray;
     private PopupWindow? _popup;
     private LiveStateFeed? _feed;
@@ -45,7 +46,8 @@ public partial class App : System.Windows.Application
         AppSettings settings;
         try
         {
-            settings = new JsonSettingsStore(settingsPath, logger).Load();
+            _store = new JsonSettingsStore(settingsPath, logger);
+            settings = _store.Load();
         }
         catch (Exception)
         {
@@ -70,6 +72,7 @@ public partial class App : System.Windows.Application
         // there is no way to see the five glyph states, and "it compiles" is not a demo.
         _tray = new TrayIconHost(_connection, settings.PreferredDeviceAddress, logger, includeSimulationMenu: true);
         _tray.QuitRequested += (_, _) => Shutdown();
+        _tray.SettingsRequested += (_, _) => OpenSettings();
         _tray.PopupRequested += (_, state) => ShowPopup(state);
 
         // The tray is useless without this: adverts → samples → state.
@@ -88,6 +91,11 @@ public partial class App : System.Windows.Application
 
         // Development aid: `HakoPods.exe --demo-popup` renders the card once so the layout can be
         // inspected (and screenshotted) without waiting for a lid event.
+        if (e.Args.Contains("--settings", StringComparer.OrdinalIgnoreCase))
+        {
+            OpenSettings();
+        }
+
         if (e.Args.Contains("--demo-unknown", StringComparer.OrdinalIgnoreCase))
         {
             ShowPopup(new HakoPods.Core.State.DeviceState
@@ -272,6 +280,20 @@ public partial class App : System.Windows.Application
 
     [System.Runtime.InteropServices.DllImport("shell32.dll")]
     private static extern int SHQueryUserNotificationState(out int state);
+
+    private void OpenSettings()
+    {
+        if (_store is null)
+        {
+            return;
+        }
+
+        var window = new SettingsWindow(_store, _settings);
+        if (window.ShowDialog() == true && window.SavedSettings is { } saved)
+        {
+            _settings = saved;
+        }
+    }
 
     private void ShowPopup(HakoPods.Core.State.DeviceState state)
     {

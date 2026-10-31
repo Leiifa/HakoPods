@@ -169,6 +169,7 @@ hardware, and kill the project early if the driver-free path does not hold up.
 
 - [ ] APW-203 | P0 | doing | M3 | deps: APW-017, APW-106 | owner: hermes | Route audio on connect
   - AC: AirPods become the default for eConsole and eCommunications within 1 s of connecting; previous endpoint stored; restored on disconnect; honours a "don't change my default device" setting.
+  - The device picker landed with the settings window: it lists render endpoints **by their real names** (needs `PROPVARIANT` via `IPropertyStore`, since names are not in the id) and stores the chosen id. Routing is therefore now reachable, not a no-op.
   - Notes: interop ported from the APW-017 spike (`IPolicyConfig` + `IMMDeviceEnumerator`, vtable order preserved) into `HakoPods.Core.Audio`, plus `AudioEndpointRouter` (list render endpoints, read the console default, set all three roles — console-only switching leaves VoIP on the old device). Wired to the lid-open edge, gated on `SwitchDefaultAudioEndpoint`. **Incomplete by design:** it switches to `PreferredAudioEndpointId`, which nothing can set yet — endpoint ids are the only stable handle Windows exposes, so the device picker has to learn one first. Until then this path is a no-op, and the restore half is APW-205.
 
 - [ ] APW-204 | P1 | todo | M3 | deps: APW-016 | Microphone policy ("stereo always")

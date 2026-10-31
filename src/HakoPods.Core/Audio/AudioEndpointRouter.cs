@@ -40,6 +40,41 @@ public sealed class AudioEndpointRouter
         return ids;
     }
 
+    /// <summary>Id plus the name a person would recognise; both are needed to build a picker.</summary>
+    public IReadOnlyList<(string Id, string? Name)> ListRenderEndpointsDetailed()
+    {
+        var deviceEnumerator = (IMMDeviceEnumerator)new MMDeviceEnumeratorComObject();
+        if (deviceEnumerator.EnumAudioEndpoints(Render, Active, out var collection) != 0)
+        {
+            return Array.Empty<(string, string?)>();
+        }
+
+        collection.GetCount(out var count);
+        var results = new List<(string, string?)>(count);
+
+        for (var index = 0; index < count; index++)
+        {
+            if (collection.Item(index, out var device) != 0 || device.GetId(out var id) != 0 || string.IsNullOrEmpty(id))
+            {
+                continue;
+            }
+
+            string? name = null;
+            try
+            {
+                name = AudioEndpointNames.TryGetFriendlyName(device);
+            }
+            catch (Exception)
+            {
+                // A single unreadable property store must not hide the other endpoints.
+            }
+
+            results.Add((id, name));
+        }
+
+        return results;
+    }
+
     public string? GetDefaultEndpointId(int role = RoleConsole)
     {
         try
