@@ -1,3 +1,4 @@
+using System.IO;
 using Microsoft.Win32;
 using Windows.Data.Xml.Dom;
 using Windows.UI.Notifications;
@@ -54,8 +55,18 @@ public static class ToastNotifier
 
             return true;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            try
+            {
+                File.WriteAllText(Path.Combine(Path.GetTempPath(), "hakopods-toast.log"),
+                    ex.GetType().Name + ": " + ex.Message);
+            }
+            catch
+            {
+                // Diagnostics only.
+            }
+
             return false;
         }
     }
