@@ -26,6 +26,8 @@ public partial class App : System.Windows.Application
     private DateTimeOffset? _earCandidateAt;
     private bool _revertedUnworn;
     private DateTimeOffset _lastRelaunch = DateTimeOffset.MinValue;
+    private CancellationTokenSource? _radioWatch;
+    private bool _radioToggled;
     private string? _previousEndpoint;
     private TrayIconHost? _tray;
     private PopupWindow? _popup;
@@ -105,6 +107,7 @@ public partial class App : System.Windows.Application
         // Polling the link is the only way to notice it and restore the speakers.
         _connectionWatch = new DispatcherTimer(TimeSpan.FromSeconds(2), DispatcherPriority.Background, (_, _) => PollConnection(), Dispatcher);
         _connectionWatch.Start();
+        StartRadioWatch();
 
         // Sleep/resume and radio toggles both leave the watcher deaf without an error. Hooking the
         // power event is the only reliable place to recover.
@@ -155,6 +158,9 @@ public partial class App : System.Windows.Application
         {
             _feed.DisposeAsync().AsTask().GetAwaiter().GetResult();
         }
+
+        _radioWatch?.Cancel();
+        _radioWatch?.Dispose();
 
         _singleInstance?.ReleaseMutex();
         _singleInstance?.Dispose();
@@ -249,6 +255,60 @@ public partial class App : System.Windows.Application
         Shutdown();
     }
 
+    /// <summary>
+    /// Watches the Bluetooth radio itself. Two things matter: a radio that comes back should get a
+    /// fresh watcher immediately, and only a radio that actually toggled justifies the relaunch
+    /// backstop — silence from an absent pair is not a fault.
+    /// </summary>
+    private void StartRadioWatch()
+    {
+        _radioWatch = new CancellationTokenSource();
+        var token = _radioWatch.Token;
+
+        _ = Task.Run(async () =>
+        {
+            bool? last = null;
+
+            while (!token.IsCancellationRequested)
+            {
+                bool on;
+
+                try
+                {
+                    var radios = await global::Windows.Devices.Radios.Radio.GetRadiosAsync().AsTask(token).ConfigureAwait(false);
+                    var bluetooth = radios.FirstOrDefault(r => r.Kind == global::Windows.Devices.Radios.RadioKind.Bluetooth);
+                    on = bluetooth is not null && bluetooth.State == global::Windows.Devices.Radios.RadioState.On;
+
+                }
+                catch (Exception)
+                {
+                    on = last ?? true;
+                }
+
+                if (last == false && on)
+                {
+                    _ = Dispatcher.BeginInvoke(() => _feed?.Restart());
+                }
+
+                if (last == true && !on)
+                {
+                    _radioToggled = true;
+                }
+
+                last = on;
+
+                try
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(2), token).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
+            }
+        });
+    }
+
     private void OnPowerModeChanged(object sender, Microsoft.Win32.PowerModeChangedEventArgs e)
     {
         if (e.Mode != Microsoft.Win32.PowerModes.Resume)
@@ -277,7 +337,7 @@ public partial class App : System.Windows.Application
         // In-process revival is unproven after a radio toggle; a fresh process is not. Two failed
         // revivals mean give up on the watcher and hand over, at most once every ten minutes so a
         // genuinely broken environment cannot become a relaunch loop.
-        if (_feed is not null && _feed.RestartsSinceLastSample >= 2
+        if (_radioToggled && _feed is not null && _feed.RestartsSinceLastSample >= 2
             && DateTimeOffset.UtcNow - _lastRelaunch > TimeSpan.FromMinutes(10))
         {
             _lastRelaunch = DateTimeOffset.UtcNow;
