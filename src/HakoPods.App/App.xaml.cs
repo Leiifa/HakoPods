@@ -23,6 +23,7 @@ public partial class App : System.Windows.Application
     private bool _wasConnected;
     private bool _routedSinceConnect;
     private bool? _anyInEar;
+    private DateTimeOffset? _earCandidateAt;
     private string? _previousEndpoint;
     private TrayIconHost? _tray;
     private PopupWindow? _popup;
@@ -280,6 +281,7 @@ public partial class App : System.Windows.Application
         else
         {
             _routedSinceConnect = false;
+            _earCandidateAt = null;
             RestorePreviousOutput();
         }
     }
@@ -370,6 +372,16 @@ public partial class App : System.Windows.Application
     {
         if (_routedSinceConnect || !state.AnyInEar || !IsConnected())
         {
+            _earCandidateAt = null;
+            return;
+        }
+
+        // Two consecutive samples must agree before acting. After a radio toggle Windows replays
+        // a cached advertisement carrying the ear state from before, and one packet is enough to
+        // steal audio while the buds are still in their case.
+        if (_earCandidateAt != state.LastSeenAt)
+        {
+            _earCandidateAt = state.LastSeenAt;
             return;
         }
 
