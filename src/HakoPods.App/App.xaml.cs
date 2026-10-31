@@ -409,8 +409,8 @@ public partial class App : System.Windows.Application
     private void ShowPopup(HakoPods.Core.State.DeviceState state)
     {
         _popup ??= new PopupWindow();
-        _popup.Apply(state, IsDarkTheme(), IsConnected());
         _popup.AccentBrush = AccentBrush();
+        _popup.Apply(state, IsDarkTheme(), IsConnected());
 
         var cursor = System.Windows.Forms.Cursor.Position;
         var screen = System.Windows.Forms.Screen.FromPoint(cursor);

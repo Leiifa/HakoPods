@@ -54,6 +54,21 @@ public partial class PopupWindow : Window
         set => SetValue(AccentBrushProperty, value);
     }
 
+    public static readonly DependencyProperty MarkBrushProperty =
+        DependencyProperty.Register(nameof(MarkBrush), typeof(Brush), typeof(PopupWindow),
+            new PropertyMetadata(Brushes.White));
+
+    /// <summary>
+    /// Accent for the bolt and the connected dot, or theme ink when the accent cannot carry them.
+    /// The owner's accent is grey; on the dark panel a grey bolt is invisible, and POPUP.md says
+    /// such a mark falls back to ink rather than shipping an unreadable cue.
+    /// </summary>
+    public Brush MarkBrush
+    {
+        get => (Brush)GetValue(MarkBrushProperty);
+        set => SetValue(MarkBrushProperty, value);
+    }
+
     public bool IsDark { get; private set; }
 
     public void Apply(DeviceState state, bool dark, bool connected)
@@ -62,10 +77,14 @@ public partial class PopupWindow : Window
         ApplyTheme(dark);
 
         ModelText.Text = string.IsNullOrWhiteSpace(state.ModelName) ? "AirPods" : state.ModelName;
+        MarkBrush = ContrastRatio(AccentBrush, IsDark ? Color.FromRgb(0x1C, 0x1C, 0x1E) : Colors.White) >= 3.0
+            ? AccentBrush
+            : _primary;
+
         StatusText.Text = connected
             ? "Connected"
             : state.IsPresent ? "Not connected" : "Not nearby";
-        StatusDot.Fill = connected ? AccentBrush : Faded(0.32);
+        StatusDot.Fill = connected ? MarkBrush : Faded(0.32);
 
         if (state.ModelName is { } name && name.Contains("Max", StringComparison.OrdinalIgnoreCase))
         {
@@ -329,6 +348,31 @@ public partial class PopupWindow : Window
         ModelText.Foreground = _primary;
         StatusText.Foreground = _secondary;
         FooterText.Foreground = _secondary;
+    }
+
+    /// <summary>WCAG relative luminance ratio, used only to decide if a mark is readable.</summary>
+    private static double ContrastRatio(Brush foreground, Color background)
+    {
+        if (foreground is not SolidColorBrush solid)
+        {
+            return 21.0;
+        }
+
+        var l1 = RelativeLuminance(solid.Color);
+        var l2 = RelativeLuminance(background);
+
+        return (Math.Max(l1, l2) + 0.05) / (Math.Min(l1, l2) + 0.05);
+    }
+
+    private static double RelativeLuminance(Color colour)
+    {
+        static double Channel(byte value)
+        {
+            var c = value / 255.0;
+            return c <= 0.03928 ? c / 12.92 : Math.Pow((c + 0.055) / 1.055, 2.4);
+        }
+
+        return (0.2126 * Channel(colour.R)) + (0.7152 * Channel(colour.G)) + (0.0722 * Channel(colour.B));
     }
 
     private SolidColorBrush Faded(double alpha)
