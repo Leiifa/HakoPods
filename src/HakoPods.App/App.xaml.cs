@@ -415,14 +415,6 @@ public partial class App : System.Windows.Application
                     {
                     await _connection.EnableHandsFreeAsync(address).ConfigureAwait(false);
 
-                    // Give Windows a moment to publish the headset endpoint, then put *only* the
-                    // communications role on it: music keeps the stereo endpoint.
-                    await Task.Delay(400).ConfigureAwait(false);
-                    var router = new HakoPods.Core.Audio.AudioEndpointRouter();
-                    if (router.FindEndpointByName("Headset") is { } callEndpoint)
-                    {
-                        router.TrySetRole(callEndpoint, 2);
-                    }
                     }
                     catch (Exception)
                     {
@@ -457,13 +449,6 @@ public partial class App : System.Windows.Application
             try
             {
             await _connection.DisableHandsFreeAsync(address).ConfigureAwait(false);
-
-            // Calls are over: hand the communications role back to the stereo endpoint.
-            var router = new HakoPods.Core.Audio.AudioEndpointRouter();
-            if (router.FindEndpointByName("Headphones") is { } mediaEndpoint)
-            {
-                router.TrySetRole(mediaEndpoint, 2);
-            }
             }
             catch (Exception)
             {
