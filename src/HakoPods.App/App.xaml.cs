@@ -139,7 +139,7 @@ public partial class App : System.Windows.Application
             var monitor = new HakoPods.Core.Audio.CaptureSessionMonitor();
             var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "HakoPods", "mic-probe.log");
 
-            for (var i = 1; i <= 20; i++)
+            for (var i = 1; i <= 90; i++)
             {
                 var line = $"{i,2}s active={monitor.IsAnyCaptureActive()} :: {string.Join(" | ", monitor.Describe())}";
                 File.AppendAllText(path, line + Environment.NewLine);
@@ -465,7 +465,10 @@ public partial class App : System.Windows.Application
             // output then steals audio for nobody.
             RememberCurrentOutput();
 
-            if (_settings.DisableHandsFreeProfile)
+            // Stereo is the default posture, but only when nothing is recording: disabling HFP
+            // unconditionally raced the mic-on-demand policy and killed the mic a tick after it
+            // was raised.
+            if (_settings.DisableHandsFreeProfile && !_capture.IsAnyCaptureActive())
             {
                 _ = Task.Run(async () =>
                 {
