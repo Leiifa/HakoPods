@@ -103,6 +103,10 @@ public partial class App : System.Windows.Application
         _connectionWatch = new DispatcherTimer(TimeSpan.FromSeconds(2), DispatcherPriority.Background, (_, _) => PollConnection(), Dispatcher);
         _connectionWatch.Start();
 
+        // Sleep/resume and radio toggles both leave the watcher deaf without an error. Hooking the
+        // power event is the only reliable place to recover.
+        Microsoft.Win32.SystemEvents.PowerModeChanged += OnPowerModeChanged;
+
         // Development aid: `HakoPods.exe --demo-popup` renders the card once so the layout can be
         // inspected (and screenshotted) without waiting for a lid event.
         if (e.Args.Contains("--settings", StringComparer.OrdinalIgnoreCase))
@@ -217,6 +221,27 @@ public partial class App : System.Windows.Application
     /// and silent when no endpoint has been learned yet — better no routing than routing to a
     /// stale id that Windows has since re-numbered.
     /// </summary>
+    private void OnPowerModeChanged(object sender, Microsoft.Win32.PowerModeChangedEventArgs e)
+    {
+        if (e.Mode != Microsoft.Win32.PowerModes.Resume)
+        {
+            return;
+        }
+
+        try
+        {
+            _feed?.Restart();
+        }
+        catch (Exception)
+        {
+            // Nothing useful to do if the radio refuses to come back; the next launch will retry.
+        }
+
+        _wasConnected = false;
+        _routedSinceConnect = false;
+        _anyInEar = null;
+    }
+
     private void PollConnection()
     {
         var connected = IsConnected();

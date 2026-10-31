@@ -192,8 +192,9 @@ hardware, and kill the project early if the driver-free path does not hold up.
 - [ ] APW-206 | P2 | todo | M3 | deps: APW-109 | Fullscreen and presentation suppression
   - AC: no popup while a fullscreen exclusive app or presentation mode is active; detection heuristic documented with its false-positive rate.
 
-- [ ] APW-207 | P1 | todo | M3 | deps: APW-103, APW-106 | Resilience: sleep, radio toggle, adapter removal
+- [ ] APW-207 | P1 | doing | M3 | deps: APW-103, APW-106 | owner: hermes | Resilience: sleep, radio toggle, adapter removal
   - AC: recovers within 5 s after resume or radio re-enable without a restart; each transition logged; no duplicate watchers after three cycles.
+  - Notes: resume is now handled explicitly — `SystemEvents.PowerModeChanged` restarts the feed and resets the connection/ear/routing latches, because a machine waking from sleep does not always produce the watcher-stopped callback the service relies on. Everything else (radio toggle, adapter removal) still depends on that callback, which is untested on real hardware. **Needs a suspend/resume cycle and one Bluetooth off/on to verify; cannot be exercised by the agent.**
 
 - [ ] APW-208 | P2 | todo | M3 | deps: APW-105 | Multi-pair support
   - AC: two pairs selectable with per-pair battery; connect targets the selected pair; follows the APW-018 identity policy; limitation documented if attribution is impossible.

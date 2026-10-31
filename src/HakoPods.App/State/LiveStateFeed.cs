@@ -56,6 +56,22 @@ public sealed class LiveStateFeed : IAsyncDisposable
         _ = Task.Run(() => PumpAsync(_cancellation.Token));
     }
 
+    /// <summary>
+    /// Restarts the watcher. The service revives itself when the watcher reports stopped, but a
+    /// machine waking from sleep does not always produce that callback — the radio comes back
+    /// without anyone noticing. Resuming is the one case that must be forced.
+    /// </summary>
+    public void Restart()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _service.Stop();
+        _service.Start();
+    }
+
     public async ValueTask DisposeAsync()
     {
         if (_disposed)
