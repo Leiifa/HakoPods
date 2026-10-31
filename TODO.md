@@ -145,7 +145,7 @@ hardware, and kill the project early if the driver-free path does not hold up.
   - AC: rolling log (5 × 1 MB) under `%LOCALAPPDATA%`; "Export diagnostics" zips logs + settings + version; no network calls; no secrets.
   - Notes: `IAppLogger` seam + `NullAppLogger`; `FileLogger` appends with a lock and rolls at 1 MB keeping 5 backups; `DiagnosticsExporter` builds a zip of settings, all log files and a version/OS stamp. No network types anywhere in Core. 3 tests: line format, rolling bounds, zip contents.
 
-- [ ] APW-113 | P2 | doing | M2 | deps: APW-101 | owner: hermes | Single instance and autostart
+- [ ] APW-113 | P2 | todo | M2 | deps: APW-101 | Single instance and autostart
   - AC: a second launch surfaces the existing instance and exits; autostart toggle writes/removes the HKCU Run value; verified after a reboot.
 
 - [ ] APW-216 | P0 | todo | M3 | deps: APW-103 | owner: hermes | Per-advertiser state, verified charging and ear bits
@@ -166,7 +166,7 @@ hardware, and kill the project early if the driver-free path does not hold up.
 
 ## M3 — Audio behaviour
 
-- [ ] APW-201 | P0 | doing | M3 | deps: APW-106, APW-109 | owner: hermes | Auto-connect on case open
+- [ ] APW-201 | P0 | todo | M3 | deps: APW-106, APW-109 | Auto-connect on case open
   - AC: opt-in; on lid-open + near, connects within 10 s, 10/10 attempts; respects a manual disconnect for 60 s; never more than one attempt per 10 s.
 
 - [ ] APW-202 | P0 | todo | M3 | deps: APW-104 | Ear-detection auto-pause and resume
