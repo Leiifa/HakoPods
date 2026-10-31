@@ -172,7 +172,7 @@ hardware, and kill the project early if the driver-free path does not hold up.
 - [ ] APW-201 | P0 | todo | M3 | deps: APW-106, APW-109 | Auto-connect on case open
   - AC: opt-in; on lid-open + near, connects within 10 s, 10/10 attempts; respects a manual disconnect for 60 s; never more than one attempt per 10 s.
 
-- [ ] APW-202 | P0 | doing | M3 | deps: APW-104 | owner: hermes | Ear-detection auto-pause and resume
+- [x] APW-202 | P0 | done | M3 | deps: APW-104 | Ear-detection auto-pause and resume
   - AC: removing a bud pauses within 2 s; reinserting resumes only media we paused; a manual pause is never overridden; works with Spotify, YouTube and a browser player.
 
 - [x] APW-203 | P0 | done | M3 | deps: APW-017, APW-106 | Route audio on connect
@@ -183,7 +183,7 @@ hardware, and kill the project early if the driver-free path does not hold up.
   - The device picker landed with the settings window: it lists render endpoints **by their real names** (needs `PROPVARIANT` via `IPropertyStore`, since names are not in the id) and stores the chosen id. Routing is therefore now reachable, not a no-op.
   - Notes: interop ported from the APW-017 spike (`IPolicyConfig` + `IMMDeviceEnumerator`, vtable order preserved) into `HakoPods.Core.Audio`, plus `AudioEndpointRouter` (list render endpoints, read the console default, set all three roles — console-only switching leaves VoIP on the old device). Wired to the lid-open edge, gated on `SwitchDefaultAudioEndpoint`. **Incomplete by design:** it switches to `PreferredAudioEndpointId`, which nothing can set yet — endpoint ids are the only stable handle Windows exposes, so the device picker has to learn one first. Until then this path is a no-op, and the restore half is APW-205.
 
-- [ ] APW-204 | P1 | todo | M3 | deps: APW-016 | Microphone policy ("stereo always")
+- [ ] APW-204 | P1 | doing | M3 | deps: APW-016 | owner: hermes | Microphone policy ("stereo always")
   - AC: toggle disables HFP so no app can force call quality; verified with Teams and a browser mic test; UI warns that the AirPods mic becomes unavailable; revert restores HFP.
 
 - [x] APW-205 | P1 | done | M3 | deps: APW-203 | Restore the previous endpoint on disconnect

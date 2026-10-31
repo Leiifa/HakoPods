@@ -233,6 +233,24 @@ public partial class App : System.Windows.Application
             // links the pair as soon as the lid opens, buds in the case included, and switching
             // output then steals audio for nobody.
             RememberCurrentOutput();
+
+            if (_settings.DisableHandsFreeProfile)
+            {
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        if (_address is { } address && _connection is not null)
+                        {
+                            await _connection.DisableHandsFreeAsync(address).ConfigureAwait(false);
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        // The policy is a preference; failing it must not disturb playback.
+                    }
+                });
+            }
         }
         else
         {

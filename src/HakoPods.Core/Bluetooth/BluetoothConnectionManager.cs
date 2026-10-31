@@ -53,6 +53,14 @@ public sealed class BluetoothConnectionManager : IDisposable
     public Task<ConnectionResult> ConnectAsync(ulong address, CancellationToken cancellationToken = default) =>
         RunAsync(address, _connectService, enable: true, cancellationToken);
 
+    /// <summary>
+    /// Turns off the hands-free profile while leaving stereo alone. Measured in APW-015: this
+    /// removes the microphone endpoints, so Windows cannot drop A2DP into narrowband headset mode
+    /// when an app grabs the mic — the "stereo always" policy.
+    /// </summary>
+    public Task<ConnectionResult> DisableHandsFreeAsync(ulong address, CancellationToken cancellationToken = default) =>
+        RunAsync(address, Win32BluetoothNative.HandsfreeService, enable: false, cancellationToken);
+
     public async Task<ConnectionResult> DisconnectAsync(ulong address, CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
