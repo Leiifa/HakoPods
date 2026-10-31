@@ -380,6 +380,25 @@ public partial class App : System.Windows.Application
     /// an app is actually capturing, and dropped again once it has been quiet for five seconds.
     /// Music therefore stays stereo all day and only a call pays the narrowband cost.
     /// </summary>
+    /// <summary>
+    /// Finds the stereo endpoint and makes it default, retrying while Windows is still publishing
+    /// it. Gives up after ~3 s rather than leaving the system on a device that is not there.
+    /// </summary>
+    private static async Task RestoreStereoEndpointAsync()
+    {
+        var router = new HakoPods.Core.Audio.AudioEndpointRouter();
+
+        for (var attempt = 0; attempt < 10; attempt++)
+        {
+            await Task.Delay(300).ConfigureAwait(false);
+
+            if (router.FindEndpointByName("Headphones") is { } stereo && router.TrySetDefault(stereo))
+            {
+                return;
+            }
+        }
+    }
+
     private void ApplyMicOnDemand()
     {
         try
@@ -414,6 +433,12 @@ public partial class App : System.Windows.Application
                     try
                     {
                     await _connection.EnableHandsFreeAsync(address).ConfigureAwait(false);
+
+                    // Publishing the headset endpoint makes Windows republish the endpoints and
+                    // move the default onto the one that carries no music. Retry until the stereo
+                    // endpoint exists again: it is absent for a moment during the flip, and one
+                    // check silently missed it, leaving playback pointed at nothing.
+                    await RestoreStereoEndpointAsync().ConfigureAwait(false);
 
                     }
                     catch (Exception)
@@ -461,6 +486,13 @@ public partial class App : System.Windows.Application
     {
         _feed?.EnsureAlive();
         ApplyMicOnDemand();
+
+        if (!_routedSinceConnect && _feed?.Current is { } current && current.AnyInEar && IsConnected())
+        {
+            _routedSinceConnect = true;
+            RememberCurrentOutput();
+            RouteAudioIfConfigured();
+        }
 
         // In-process revival is unproven after a radio toggle; a fresh process is not. Two failed
         // revivals mean give up on the watcher and hand over, at most once every ten minutes so a
