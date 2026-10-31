@@ -222,8 +222,9 @@ hardware, and kill the project early if the driver-free path does not hold up.
 - [ ] APW-303 | P3 | todo | M4 | deps: APW-301 | Localisation scaffold
   - AC: all user strings in resx; English shipped; a second language proves the pipeline; a test fails on hardcoded UI strings.
 
-- [ ] APW-304 | P1 | todo | M4 | deps: APW-112 | Crash handling
+- [x] APW-304 | P1 | done | M4 | deps: APW-112 | Crash handling
   - AC: unhandled exceptions logged with stack and version; app exits cleanly or restarts; no PII; verified with a debug-only forced throw.
+  - Notes: `Dispatcher`, `AppDomain` and `TaskScheduler` handlers write to `%LOCALAPPDATA%\HakoPods\crash.log` with timestamp, source, version and full stack. A dispatcher exception is marked handled so the tray survives rather than vanishing. Verified with `--test-crash` (Debug only): the log captured the forced exception with its stack and `version: 0.1.0`. No device names or addresses are written.
 
 - [ ] APW-305 | P1 | todo | M4 | deps: APW-301 | Packaging
   - AC: `dotnet publish -c Release -r win-x64 --self-contained` produces a single-file exe ≤ 80 MB; per-user installer with no admin prompt; uninstall leaves no files behind.

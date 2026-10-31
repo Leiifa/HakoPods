@@ -40,6 +40,8 @@ public partial class App : System.Windows.Application
     {
         base.OnStartup(e);
 
+        CrashLog.Install(this);
+
         // One tray icon per user: a second launch must not create a second icon or a second
         // watcher fighting over the radio.
         _singleInstance = new Mutex(initiallyOwned: true, @"Local\HakoPods.SingleInstance", out var isFirst);
@@ -122,6 +124,13 @@ public partial class App : System.Windows.Application
 
         // Development aid: `HakoPods.exe --demo-popup` renders the card once so the layout can be
         // inspected (and screenshotted) without waiting for a lid event.
+#if DEBUG
+        if (e.Args.Contains("--test-crash", StringComparer.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException("Forced crash for the crash-log test.");
+        }
+#endif
+
         if (e.Args.Contains("--test-toast", StringComparer.OrdinalIgnoreCase))
         {
             HakoPods.App.Notifications.ToastNotifier.Show("AirPods Pro",
