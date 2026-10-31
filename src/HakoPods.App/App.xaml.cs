@@ -78,6 +78,10 @@ public partial class App : System.Windows.Application
             // A locked-down policy key must not stop the app from running.
         }
 
+        // Toasts need both: a Start-menu shortcut carrying the AppUserModelID, and a matching
+        // registry entry. Either alone shows nothing.
+        HakoPods.App.Notifications.ShortcutFactory.EnsureShortcut(
+            "HakoPods.Tray", Environment.ProcessPath ?? string.Empty, "HakoPods");
         HakoPods.App.Notifications.ToastNotifier.EnsureRegistered("HakoPods");
 
         _native = new Win32BluetoothNative();
