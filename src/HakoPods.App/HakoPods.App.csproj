@@ -25,4 +25,12 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Bundled, not assumed: Segoe UI would silently replace the type scale at runtime. -->
+    <Resource Include="Assets\Fonts\*.ttf" />
+    <Content Include="Assets\Fonts\OFL.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>
