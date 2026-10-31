@@ -134,7 +134,7 @@ hardware, and kill the project early if the driver-free path does not hold up.
   - Verified 2026-10-31 with three labelled captures: both in ears → status `0x0b` (both ear bits), left only → `0x22` (0x02, primary left) → "Left", right only → `0x02` (0x02, primary right) → "Right". **The parser and its primary-swap are correct.** The owner's wrong ear came from a replayed packet: with one bud in and the lid closed the pair advertises ~once per 15 s, and Windows re-delivers buffered adverts that receive-time cannot date. Ear state is now only claimed while the reading is under 10 s old; older readings fall back to "Last reading" with no ear marker.
   - Notes: implemented on the closed → open edge with a 10 s cooldown and `SHQueryUserNotificationState` suppression (busy / D3D fullscreen / presentation). Samples older than 5 s, or older than the sample already applied, are dropped — Windows re-delivers cached adverts after a wake and they carry the ear and lid bits from before the case closed, which is what made the first popup show a stale ear. **p95 needs 20 real lid opens to measure**; two observations so far (409 ms, 1.2 s).
 
-- [ ] APW-110 | P2 | todo | M2 | deps: APW-107 | Low-battery warning
+- [x] APW-110 | P2 | done | M2 | deps: APW-107 | Low-battery warning
   - AC: exactly one notification per threshold crossing at 10 % for each bud and the case; silent until recharged above 20 %; verified by injecting synthetic states.
 
 - [x] APW-111 | P1 | done | M2 | deps: APW-101 | Settings store
@@ -145,7 +145,7 @@ hardware, and kill the project early if the driver-free path does not hold up.
   - AC: rolling log (5 × 1 MB) under `%LOCALAPPDATA%`; "Export diagnostics" zips logs + settings + version; no network calls; no secrets.
   - Notes: `IAppLogger` seam + `NullAppLogger`; `FileLogger` appends with a lock and rolls at 1 MB keeping 5 backups; `DiagnosticsExporter` builds a zip of settings, all log files and a version/OS stamp. No network types anywhere in Core. 3 tests: line format, rolling bounds, zip contents.
 
-- [ ] APW-113 | P2 | todo | M2 | deps: APW-101 | Single instance and autostart
+- [ ] APW-113 | P2 | doing | M2 | deps: APW-101 | owner: hermes | Single instance and autostart
   - AC: a second launch surfaces the existing instance and exits; autostart toggle writes/removes the HKCU Run value; verified after a reboot.
 
 - [ ] APW-114 | P0 | todo | M2 | deps: APW-102, APW-104 | Test suite for parser and state machine
