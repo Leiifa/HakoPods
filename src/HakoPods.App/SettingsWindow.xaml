@@ -28,6 +28,7 @@
                       FontSize="13" Margin="0,0,0,8" />
             <CheckBox x:Name="StartWithWindows" Content="Launch HakoPods when Windows starts"
                       FontSize="13" Margin="0,0,0,8" />
+            <CheckBox x:Name="StereoAlways" Content="Keep stereo quality when the microphone is used" FontSize="13" Margin="0,0,0,8" />
             <CheckBox x:Name="AutoConnect" Content="Connect my AirPods when the lid opens"
                       FontSize="13" Margin="0,0,0,14" />
 

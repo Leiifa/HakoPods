@@ -38,6 +38,7 @@ public partial class SettingsWindow : Window
         SwitchAudio.IsChecked = settings.SwitchDefaultAudioEndpoint;
         StartWithWindows.IsChecked = settings.StartWithWindows;
         AutoConnect.IsChecked = settings.AutoConnectOnLidOpen;
+        StereoAlways.IsChecked = settings.DisableHandsFreeProfile;
     }
 
     public AppSettings? SavedSettings { get; private set; }
@@ -52,6 +53,7 @@ public partial class SettingsWindow : Window
             SwitchDefaultAudioEndpoint = SwitchAudio.IsChecked == true,
             StartWithWindows = StartWithWindows.IsChecked == true,
             AutoConnectOnLidOpen = AutoConnect.IsChecked == true,
+            DisableHandsFreeProfile = StereoAlways.IsChecked == true,
         };
 
         try
