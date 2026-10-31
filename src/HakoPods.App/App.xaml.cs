@@ -382,6 +382,19 @@ public partial class App : System.Windows.Application
     /// </summary>
     private void ApplyMicOnDemand()
     {
+        try
+        {
+            ApplyMicOnDemandCore();
+        }
+        catch (Exception)
+        {
+            // Endpoints vanish mid-flight when a profile flips; a transient device error must not
+            // become a crash report every two seconds.
+        }
+    }
+
+    private void ApplyMicOnDemandCore()
+    {
         if (!_settings.DisableHandsFreeProfile || _address is not { } address || _connection is null || !IsConnected())
         {
             return;
@@ -396,7 +409,26 @@ public partial class App : System.Windows.Application
             if (!_hfpUp)
             {
                 _hfpUp = true;
-                _ = Task.Run(() => _connection.EnableHandsFreeAsync(address));
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                    await _connection.EnableHandsFreeAsync(address).ConfigureAwait(false);
+
+                    // Give Windows a moment to publish the headset endpoint, then put *only* the
+                    // communications role on it: music keeps the stereo endpoint.
+                    await Task.Delay(400).ConfigureAwait(false);
+                    var router = new HakoPods.Core.Audio.AudioEndpointRouter();
+                    if (router.FindEndpointByName("Headset") is { } callEndpoint)
+                    {
+                        router.TrySetRole(callEndpoint, 2);
+                    }
+                    }
+                    catch (Exception)
+                    {
+                        // Transient device errors are expected while profiles flip.
+                    }
+                });
             }
 
             return;
@@ -413,14 +445,31 @@ public partial class App : System.Windows.Application
             return;
         }
 
-        if (DateTimeOffset.UtcNow - _captureIdleSince < TimeSpan.FromSeconds(5))
+        if (DateTimeOffset.UtcNow - _captureIdleSince < TimeSpan.FromSeconds(1.5))
         {
             return;
         }
 
         _hfpUp = false;
         _captureIdleSince = DateTimeOffset.MinValue;
-        _ = Task.Run(() => _connection.DisableHandsFreeAsync(address));
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+            await _connection.DisableHandsFreeAsync(address).ConfigureAwait(false);
+
+            // Calls are over: hand the communications role back to the stereo endpoint.
+            var router = new HakoPods.Core.Audio.AudioEndpointRouter();
+            if (router.FindEndpointByName("Headphones") is { } mediaEndpoint)
+            {
+                router.TrySetRole(mediaEndpoint, 2);
+            }
+            }
+            catch (Exception)
+            {
+                // Same: a device can disappear between the check and the call.
+            }
+        });
     }
 
     private void PollConnection()

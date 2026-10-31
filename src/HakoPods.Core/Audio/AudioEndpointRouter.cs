@@ -92,6 +92,36 @@ public sealed class AudioEndpointRouter
     }
 
     /// <summary>
+    /// Switches one role only. Used to put calls on the hands-free endpoint while leaving music
+    /// on the stereo one — the closest Classic Bluetooth gets to "hi-res during a call".
+    /// </summary>
+    public bool TrySetRole(string endpointId, int role)
+    {
+        try
+        {
+            var policy = (IPolicyConfig)new PolicyConfigClient();
+            return policy.SetDefaultEndpoint(endpointId, role) == 0;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    public string? FindEndpointByName(string contains)
+    {
+        foreach (var (id, name) in ListRenderEndpointsDetailed())
+        {
+            if (name is not null && name.Contains(contains, StringComparison.OrdinalIgnoreCase))
+            {
+                return id;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
     /// All three roles, because switching only the console role leaves VoIP and media on the old
     /// device — the failure people describe as "music went to the AirPods but Teams did not".
     /// </summary>
