@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-31 — Microphone on demand
+
+- Stereo stays default while idle; the AirPods microphone is raised only while an app is recording
+  and lowered 1.5 s after capture ends.
+- A2DP is cycled after hangup: the stream wedges when the profile flips, leaving routing correct
+  but silent. Cycling rebuilds the endpoint and the stream with it.
+- Known: 1–5 s silence at call start while Windows republishes endpoints.
+
+
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows
 [Semantic Versioning](https://semver.org/).
