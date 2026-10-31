@@ -187,6 +187,26 @@ public partial class App : System.Windows.Application
         ShowPopup(state);
 
         AutoConnectIfNeeded();
+        RouteAudioIfConfigured();
+    }
+
+    /// <summary>
+    /// Switches playback to the endpoint the user chose, once per lid open. Gated on the setting,
+    /// and silent when no endpoint has been learned yet — better no routing than routing to a
+    /// stale id that Windows has since re-numbered.
+    /// </summary>
+    private void RouteAudioIfConfigured()
+    {
+        if (!_settings.SwitchDefaultAudioEndpoint || _settings.PreferredAudioEndpointId is not { } endpoint)
+        {
+            return;
+        }
+
+        var router = new HakoPods.Core.Audio.AudioEndpointRouter();
+        if (!router.TrySetDefault(endpoint))
+        {
+            LastConnectError = "could not switch playback to the saved endpoint";
+        }
     }
 
     /// <summary>
