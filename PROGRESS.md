@@ -20,7 +20,7 @@
 | Blocked | 0 |
 | Product code | parser, watcher, reducer, settings, logging, selection, connection, tray — 65 tests green |
 | Toolchain | .NET SDK 8.0.427 installed |
-| Repo | not initialised (no `git init` yet) |
+| Repo | git initialised 2026-10-31 — commit `de6f6d6`, no remote yet |
 
 ## What exists
 
