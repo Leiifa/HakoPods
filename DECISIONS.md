@@ -351,3 +351,16 @@ information exists for anyone who opens it; it simply does not interrupt.
 **Consequence.** `ShowLowBatteryNotifications` is gone from `AppSettings`, so no dead switch
 remains. If a noisy-environment case ever appears (buds not worn while the case drains), the
 right shape is an opt-in setting, not a default-on toast.
+
+## ADR-015 — Accept the 1–5 s gap at call start
+
+**Status:** accepted (owner decision, 2026-10-31)
+
+A call briefly loses audio while Windows republishes the endpoints as the hands-free profile comes
+up. The candidate fix — cycling A2DP right after raising hands-free — touches the endpoint during a
+live profile flip, which broke playback on every earlier attempt tonight. The gap is cosmetic and
+self-healing; an unstable call is not. Leave it.
+
+Revisit only if the gap grows, or if a profile-change notification (rather than a poll) can trigger
+the rebuild at the moment Windows finishes publishing.
+
