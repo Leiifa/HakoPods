@@ -22,6 +22,7 @@ public partial class App : System.Windows.Application
     private DispatcherTimer? _connectionWatch;
     private bool _wasConnected;
     private bool _routedSinceConnect;
+    private bool? _anyInEar;
     private string? _previousEndpoint;
     private TrayIconHost? _tray;
     private PopupWindow? _popup;
@@ -92,6 +93,7 @@ public partial class App : System.Windows.Application
         {
             _tray.ApplyState(state);
             OnStateChanged(state);
+            PauseOnEarChange(state);
             RouteOnWear(state);
         };
         _feed.Start();
@@ -283,6 +285,39 @@ public partial class App : System.Windows.Application
             router.TrySetDefault(previous);
         }
     }
+
+    /// <summary>
+    /// Pauses when the last bud comes out and resumes when one goes back in — the AirPods
+    /// behaviour everyone notices. Transitions only: a burst of packets carrying the same ear
+    /// state must not toggle playback repeatedly.
+    /// </summary>
+    private void PauseOnEarChange(HakoPods.Core.State.DeviceState state)
+    {
+        if (!_settings.PauseOnEarChange || !IsFresh(state))
+        {
+            return;
+        }
+
+        var inEar = state.AnyInEar;
+        if (_anyInEar is null)
+        {
+            _anyInEar = inEar;
+            return;
+        }
+
+        if (inEar == _anyInEar.Value)
+        {
+            return;
+        }
+
+        _anyInEar = inEar;
+        HakoPods.Core.Audio.MediaKeySender.TogglePlayPause();
+    }
+
+    /// <summary>Ear state older than this is not worth acting on.</summary>
+    private static bool IsFresh(HakoPods.Core.State.DeviceState state) =>
+        state.IsPresent && state.LastSeenAt is { } seen
+        && DateTimeOffset.UtcNow - seen < TimeSpan.FromSeconds(10);
 
     /// <summary>
     /// Switches playback the first time a bud is worn after connecting. `AnyInEar` comes from the

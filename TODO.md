@@ -172,9 +172,8 @@ hardware, and kill the project early if the driver-free path does not hold up.
 - [ ] APW-201 | P0 | todo | M3 | deps: APW-106, APW-109 | Auto-connect on case open
   - AC: opt-in; on lid-open + near, connects within 10 s, 10/10 attempts; respects a manual disconnect for 60 s; never more than one attempt per 10 s.
 
-- [ ] APW-202 | P0 | todo | M3 | deps: APW-104 | Ear-detection auto-pause and resume
+- [ ] APW-202 | P0 | doing | M3 | deps: APW-104 | owner: hermes | Ear-detection auto-pause and resume
   - AC: removing a bud pauses within 2 s; reinserting resumes only media we paused; a manual pause is never overridden; works with Spotify, YouTube and a browser player.
-  - **Parked at the owner's request (2026-10-31)** — not started; revisit when the owner asks.
 
 - [x] APW-203 | P0 | done | M3 | deps: APW-017, APW-106 | Route audio on connect
   - AC: AirPods become the default for eConsole and eCommunications within 1 s of connecting; previous endpoint stored; restored on disconnect; honours a "don't change my default device" setting.
@@ -186,7 +185,6 @@ hardware, and kill the project early if the driver-free path does not hold up.
 
 - [ ] APW-204 | P1 | todo | M3 | deps: APW-016 | Microphone policy ("stereo always")
   - AC: toggle disables HFP so no app can force call quality; verified with Teams and a browser mic test; UI warns that the AirPods mic becomes unavailable; revert restores HFP.
-  - **Parked at the owner's request (2026-10-31)** — not started; revisit when the owner asks.
 
 - [x] APW-205 | P1 | done | M3 | deps: APW-203 | Restore the previous endpoint on disconnect
   - AC: after both buds are cased and the device disconnects, the stored endpoint is restored within 2 s; a 2 s debounce prevents flip-flop on immediate reconnect.
@@ -196,7 +194,6 @@ hardware, and kill the project early if the driver-free path does not hold up.
 
 - [ ] APW-207 | P1 | todo | M3 | deps: APW-103, APW-106 | Resilience: sleep, radio toggle, adapter removal
   - AC: recovers within 5 s after resume or radio re-enable without a restart; each transition logged; no duplicate watchers after three cycles.
-  - **Parked at the owner's request (2026-10-31)** — not started; revisit when the owner asks.
 
 - [ ] APW-208 | P2 | todo | M3 | deps: APW-105 | Multi-pair support
   - AC: two pairs selectable with per-pair battery; connect targets the selected pair; follows the APW-018 identity policy; limitation documented if attribution is impossible.

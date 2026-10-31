@@ -20,6 +20,9 @@ public sealed record AppSettings
 
     public bool SwitchDefaultAudioEndpoint { get; init; } = true;
 
+    /// <summary>Pause when a bud comes out, resume when one goes back in.</summary>
+    public bool PauseOnEarChange { get; init; } = true;
+
     /// <summary>Endpoint id learned when the user picked the AirPods as output.</summary>
     public string? PreferredAudioEndpointId { get; init; }
 
