@@ -1,6 +1,7 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Brush = System.Windows.Media.Brush;
 using Color = System.Windows.Media.Color;
 using HakoPods.App.Popup;
@@ -18,6 +19,9 @@ public partial class App : System.Windows.Application
     private ulong? _address;
     private AppSettings _settings = new();
     private JsonSettingsStore? _store;
+    private DispatcherTimer? _connectionWatch;
+    private bool _wasConnected;
+    private string? _previousEndpoint;
     private TrayIconHost? _tray;
     private PopupWindow? _popup;
     private LiveStateFeed? _feed;
@@ -88,6 +92,11 @@ public partial class App : System.Windows.Application
             OnStateChanged(state);
         };
         _feed.Start();
+
+        // Advertisements stop when the pair sleeps, so a disconnect is invisible to the feed.
+        // Polling the link is the only way to notice it and restore the speakers.
+        _connectionWatch = new DispatcherTimer(TimeSpan.FromSeconds(2), DispatcherPriority.Background, (_, _) => PollConnection(), Dispatcher);
+        _connectionWatch.Start();
 
         // Development aid: `HakoPods.exe --demo-popup` renders the card once so the layout can be
         // inspected (and screenshotted) without waiting for a lid event.
@@ -203,6 +212,58 @@ public partial class App : System.Windows.Application
     /// and silent when no endpoint has been learned yet — better no routing than routing to a
     /// stale id that Windows has since re-numbered.
     /// </summary>
+    private void PollConnection()
+    {
+        var connected = IsConnected();
+        if (connected == _wasConnected)
+        {
+            return;
+        }
+
+        _wasConnected = connected;
+
+        if (connected)
+        {
+            RememberCurrentOutput();
+            RouteAudioIfConfigured();
+        }
+        else
+        {
+            RestorePreviousOutput();
+        }
+    }
+
+    /// <summary>
+    /// Captures what was playing before the buds arrived, so it can be put back. Skipped when the
+    /// current default is already the AirPods — otherwise a reconnect would remember the buds as
+    /// "previous" and restore to them.
+    /// </summary>
+    private void RememberCurrentOutput()
+    {
+        var router = new HakoPods.Core.Audio.AudioEndpointRouter();
+        var current = router.GetDefaultEndpointId();
+        var airPods = FindAirPodsEndpoint(router);
+
+        if (current is not null && current != airPods)
+        {
+            _previousEndpoint = current;
+        }
+    }
+
+    private void RestorePreviousOutput()
+    {
+        if (_previousEndpoint is not { } previous || !_settings.SwitchDefaultAudioEndpoint)
+        {
+            return;
+        }
+
+        var router = new HakoPods.Core.Audio.AudioEndpointRouter();
+        if (router.GetDefaultEndpointId() is { } current && FindAirPodsEndpoint(router) == current)
+        {
+            router.TrySetDefault(previous);
+        }
+    }
+
     private void RouteAudioIfConfigured()
     {
         if (!_settings.SwitchDefaultAudioEndpoint)
