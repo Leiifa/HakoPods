@@ -15,7 +15,7 @@
 
 | | |
 |---|---|
-| Tasks done | 28 of 56 |
+| Tasks done | 27 of 55 |
 | In review | 0 |
 | Blocked | 0 |
 | Product code | parser, watcher, reducer, settings, logging, selection, connection, tray — 65 tests green |

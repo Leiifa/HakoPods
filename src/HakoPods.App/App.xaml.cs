@@ -150,8 +150,6 @@ public partial class App : System.Windows.Application
             : null;
     }
 
-    private readonly Dictionary<string, DateTimeOffset> _lowWarnedAt = new();
-
     private DateTimeOffset _lastPopupAt = DateTimeOffset.MinValue;
     private bool _lidWasOpen;
 
@@ -187,47 +185,6 @@ public partial class App : System.Windows.Application
 
         _lastPopupAt = DateTimeOffset.UtcNow;
         ShowPopup(state);
-
-        WarnIfLow(state);
-    }
-
-    /// <summary>
-    /// At most one warning per component every 30 minutes, and only for levels we actually have.
-    /// The threshold matches the rail colour change so the toast and the card agree.
-    /// </summary>
-    private void WarnIfLow(HakoPods.Core.State.DeviceState state)
-    {
-        if (!_settings.ShowLowBatteryNotifications)
-        {
-            return;
-        }
-
-        var parts = new List<string>();
-
-        void Check(string name, int? level)
-        {
-            if (level is not int value || value > 10)
-            {
-                return;
-            }
-
-            if (_lowWarnedAt.TryGetValue(name, out var last) && DateTimeOffset.UtcNow - last < TimeSpan.FromMinutes(30))
-            {
-                return;
-            }
-
-            _lowWarnedAt[name] = DateTimeOffset.UtcNow;
-            parts.Add($"{name} {value} %");
-        }
-
-        Check("Left", state.LeftBatteryPercent);
-        Check("Right", state.RightBatteryPercent);
-        Check("Case", state.CaseBatteryPercent);
-
-        if (parts.Count > 0)
-        {
-            _tray?.ShowLowBattery(string.Join(" · ", parts));
-        }
     }
 
     /// <summary>

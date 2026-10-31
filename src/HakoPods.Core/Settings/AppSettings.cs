@@ -20,7 +20,6 @@ public sealed record AppSettings
 
     public bool DisableHandsFreeProfile { get; init; }
 
-    public bool ShowLowBatteryNotifications { get; init; } = true;
 
     public bool StartWithWindows { get; init; }
 

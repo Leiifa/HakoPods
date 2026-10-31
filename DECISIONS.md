@@ -336,3 +336,18 @@ brand, and the README carries an explicit non-affiliation notice.
 **Icon.** 箱/耳 as a brand mark only, at 48 px and above. The tray glyph stays the case-and-buds
 silhouette, because a kanji collapses into a smudge at 16 px.
 
+---
+
+## ADR-014 — No battery notifications; the AirPods already chime
+
+**Decision.** The app shows no low-battery toast. APW-110 was removed rather than deferred.
+
+**Why.** The AirPods play their own low-battery tone in the wearer's ears, at the moment it
+matters and only to the person it concerns. A tray toast duplicates that a second or two later,
+and a desktop notification about earbuds nobody is looking at is the kind of noise that gets an
+app muted — or uninstalled. The card still turns the rail red and prints `Low`, so the
+information exists for anyone who opens it; it simply does not interrupt.
+
+**Consequence.** `ShowLowBatteryNotifications` is gone from `AppSettings`, so no dead switch
+remains. If a noisy-environment case ever appears (buds not worn while the case drains), the
+right shape is an opt-in setting, not a default-on toast.

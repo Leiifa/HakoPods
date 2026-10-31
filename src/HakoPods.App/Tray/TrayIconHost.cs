@@ -168,18 +168,6 @@ public sealed class TrayIconHost : IDisposable
         }
     }
 
-    /// <summary>
-    /// Windows renders this as a toast on 11. One call per event, never a loop: a notification
-    /// every advertisement would be harassment.
-    /// </summary>
-    public void ShowLowBattery(string text)
-    {
-        _icon.BalloonTipTitle = "Battery low";
-        _icon.BalloonTipText = text;
-        _icon.BalloonTipIcon = ToolTipIcon.Warning;
-        _icon.ShowBalloonTip(5000);
-    }
-
     private void UpdateMenuAvailability()
     {
         var reachable = _state.IsPresent;
