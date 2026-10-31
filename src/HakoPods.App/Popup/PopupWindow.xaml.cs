@@ -198,7 +198,7 @@ public partial class PopupWindow : Window
             return;
         }
 
-        RenderLevel(tbValue, tbPercent, track, fill, level.Value, railWidth, charging, low);
+        RenderLevel(tbValue, tbPercent, track, fill, bolt, level.Value, railWidth, charging, low);
     }
 
     private void ApplySingle(
@@ -218,17 +218,24 @@ public partial class PopupWindow : Window
             return;
         }
 
-        RenderLevel(tbValue, tbPercent, track, fill, level.Value, railWidth, charging, low);
+        RenderLevel(tbValue, tbPercent, track, fill, null, level.Value, railWidth, charging, low);
     }
 
     private void RenderLevel(TextBlock tbValue, TextBlock tbPercent, Border track, Border fill,
-        int level, double railWidth, bool charging, TextBlock low)
+        FrameworkElement? bolt, int level, double railWidth, bool charging, TextBlock low)
     {
         tbValue.Text = level.ToString();
         tbValue.FontSize = 32;
         tbValue.FontWeight = FontWeights.SemiBold;
         tbValue.Foreground = _primary;
         tbPercent.Visibility = Visibility.Visible;
+
+        // The bolt was dropped in a rewrite and no charging state ever showed one: the case
+        // read 60 % while charging and looked identical to 60 % idle.
+        if (bolt is not null)
+        {
+            bolt.Visibility = charging ? Visibility.Visible : Visibility.Collapsed;
+        }
 
         var clamped = Math.Clamp(level, 0, 100);
 
