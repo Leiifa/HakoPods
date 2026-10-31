@@ -207,10 +207,11 @@ hardware, and kill the project early if the driver-free path does not hold up.
 - [x] APW-205 | P1 | done | M3 | deps: APW-203 | Restore the previous endpoint on disconnect
   - AC: after both buds are cased and the device disconnects, the stored endpoint is restored within 2 s; a 2 s debounce prevents flip-flop on immediate reconnect.
 
-- [ ] APW-206 | P2 | todo | M3 | deps: APW-109 | Fullscreen and presentation suppression
+- [ ] APW-206 | P2 | review | M3 | deps: APW-109 | owner: leifa | Fullscreen and presentation suppression
   - AC: no popup while a fullscreen exclusive app or presentation mode is active; detection heuristic documented with its false-positive rate.
 
-- [ ] APW-207 | P1 | doing | M3 | deps: APW-103, APW-106 | owner: hermes | Resilience: sleep, radio toggle, adapter removal
+- [x] APW-207 | P1 | done | M3 | deps: APW-103, APW-106 | owner: hermes | Resilience: sleep, radio toggle, adapter removal
+  - Verified 2026-10-31 (owner): Bluetooth off/on recovers without restarting the app. Sleep/resume and adapter removal use the same `feed.Restart()` path but were not exercised; owner judged a suspend test unnecessary. Implemented, unverified.
   - AC: recovers within 5 s after resume or radio re-enable without a restart; each transition logged; no duplicate watchers after three cycles.
   - Notes: resume is now handled explicitly — `SystemEvents.PowerModeChanged` restarts the feed and resets the connection/ear/routing latches, because a machine waking from sleep does not always produce the watcher-stopped callback the service relies on. Everything else (radio toggle, adapter removal) still depends on that callback, which is untested on real hardware. **Needs a suspend/resume cycle and one Bluetooth off/on to verify; cannot be exercised by the agent.**
 

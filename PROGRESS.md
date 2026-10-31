@@ -7,7 +7,7 @@
 **Last updated:** 2026-10-31 15:05 (UTC+7) · **By:** Hermes
 **Phase:** M2 at 11 of 16 — tray, popup and lid trigger shipped and confirmed; settings and diagnostics remain
 **Current milestone:** M2
-**Current task:** APW-207 is the only task waiting on hardware (one suspend/resume, one radio toggle)
+**Current task:** APW-206 is in review — needs a fullscreen check (a video or game full-screen, then open the lid; no card should appear)
 
 ---
 

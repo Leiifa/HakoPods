@@ -732,13 +732,20 @@ public partial class App : System.Windows.Application
                 return false;
             }
 
-            return state is 2 or 3 or 4; // busy, D3D fullscreen, presentation mode
+            return IsSuppressedState(state);
         }
         catch (DllNotFoundException)
         {
             return false;
         }
     }
+
+    /// <summary>
+    /// QUNS values that mean "do not interrupt": 1 quiet time, 2 busy, 3 full-screen D3D app,
+    /// 4 presentation mode, 7 full-screen Store app. 7 was missing — a Store game still popped the
+    /// card over the screen.
+    /// </summary>
+    internal static bool IsSuppressedState(int state) => state is 1 or 2 or 3 or 4 or 7;
 
     [System.Runtime.InteropServices.DllImport("shell32.dll")]
     private static extern int SHQueryUserNotificationState(out int state);
