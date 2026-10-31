@@ -134,6 +134,22 @@ public partial class App : System.Windows.Application
         }
 #endif
 
+        if (e.Args.Contains("--mic-probe", StringComparer.OrdinalIgnoreCase))
+        {
+            var monitor = new HakoPods.Core.Audio.CaptureSessionMonitor();
+            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "HakoPods", "mic-probe.log");
+
+            for (var i = 1; i <= 20; i++)
+            {
+                var line = $"{i,2}s active={monitor.IsAnyCaptureActive()} :: {string.Join(" | ", monitor.Describe())}";
+                File.AppendAllText(path, line + Environment.NewLine);
+                System.Threading.Thread.Sleep(1000);
+            }
+
+            Shutdown();
+            return;
+        }
+
         if (e.Args.Contains("--test-toast", StringComparer.OrdinalIgnoreCase))
         {
             HakoPods.App.Notifications.ToastNotifier.Show("AirPods Pro",

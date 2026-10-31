@@ -48,6 +48,60 @@ public sealed class CaptureSessionMonitor
         }
     }
 
+    /// <summary>Diagnostics: one line per capture device with its session states.</summary>
+    public IReadOnlyList<string> Describe()
+    {
+        var lines = new List<string>();
+
+        try
+        {
+            var enumerator = (IMMDeviceEnumerator)new MMDeviceEnumeratorComObject();
+            if (enumerator.EnumAudioEndpoints(Capture, Active, out var devices) != 0)
+            {
+                return new[] { "enumeration failed" };
+            }
+
+            devices.GetCount(out var deviceCount);
+
+            for (var index = 0; index < deviceCount; index++)
+            {
+                if (devices.Item(index, out var device) != 0)
+                {
+                    continue;
+                }
+
+                var managerId = typeof(IAudioSessionManager2).GUID;
+                if (device.Activate(ref managerId, ClsCtxAll, IntPtr.Zero, out var managerObject) != 0
+                    || managerObject is not IAudioSessionManager2 manager
+                    || manager.GetSessionEnumerator(out var sessions) != 0)
+                {
+                    lines.Add($"device {index}: no session manager");
+                    continue;
+                }
+
+                sessions.GetCount(out var count);
+                var states = new List<string>(count);
+
+                for (var s = 0; s < count; s++)
+                {
+                    if (sessions.GetSession(s, out var session) == 0 && session is not null
+                        && session.GetState(out var state) == 0)
+                    {
+                        states.Add(state.ToString());
+                    }
+                }
+
+                lines.Add($"device {index}: sessions={count} states=[{string.Join(",", states)}]");
+            }
+        }
+        catch (Exception ex)
+        {
+            lines.Add("error: " + ex.GetType().Name);
+        }
+
+        return lines;
+    }
+
     private static bool HasActiveSession(IMMDevice device)
     {
         var managerId = typeof(IAudioSessionManager2).GUID;
