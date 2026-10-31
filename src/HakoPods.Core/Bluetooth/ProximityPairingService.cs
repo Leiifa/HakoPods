@@ -166,6 +166,16 @@ public sealed class ProximityPairingService : IAsyncDisposable
         }
 
         Interlocked.Increment(ref _restartCount);
-        _watcher.Start();
+
+        try
+        {
+            _watcher.Start();
+        }
+        catch (Exception)
+        {
+            // 0x800710DF when the radio is off or the adapter is gone: the watcher cannot bind.
+            // Thrown inside a task whose exception nobody observes, which the finalizer then
+            // rethrows — that took the whole app down on a Bluetooth toggle.
+        }
     }
 }
