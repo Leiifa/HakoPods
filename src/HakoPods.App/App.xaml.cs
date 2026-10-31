@@ -185,7 +185,42 @@ public partial class App : System.Windows.Application
 
         _lastPopupAt = DateTimeOffset.UtcNow;
         ShowPopup(state);
+
+        AutoConnectIfNeeded();
     }
+
+    /// <summary>
+    /// Lid open is when Windows is most likely to connect by itself (0–1 s, APW-013), so this is a
+    /// nudge rather than the main path: it only acts when the link is genuinely down, and it never
+    /// blocks the UI. Failures are logged and swallowed — a refused connect must not surface as a
+    /// dialog over someone's work.
+    /// </summary>
+    private void AutoConnectIfNeeded()
+    {
+        if (!_settings.AutoConnectOnLidOpen || _address is not { } address || IsConnected() || _connection is null)
+        {
+            return;
+        }
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                var result = await _connection.ConnectAsync(address).ConfigureAwait(false);
+                if (!result.Success)
+                {
+                    LastConnectError = result.Error;
+                }
+            }
+            catch (Exception ex)
+            {
+                LastConnectError = ex.Message;
+            }
+        });
+    }
+
+    /// <summary>Kept for the diagnostics surface; null when the last auto-connect worked.</summary>
+    public static string? LastConnectError { get; private set; }
 
     /// <summary>
     /// The card is for the pair this PC knows, not for whatever AirPods happen to be on the desk.
