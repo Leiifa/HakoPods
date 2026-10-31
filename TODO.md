@@ -155,8 +155,9 @@ hardware, and kill the project early if the driver-free path does not hold up.
   - Finding so far: two labelled captures prove the charging byte is identical before and after the case goes on power, and the case's advertiser disappears while charging. Charging is therefore not in `payload[7]`'s low bits, and the mark stays off. Next capture must have the case **open and on power** so its advertiser is present.
   - AC: a labelled capture (idle, charging, one bud in, both in) identifies which byte carries the charging bits and which advertiser describes the buds in use; the card never claims a component is charging or in an ear that the current ground truth contradicts.
 
-- [ ] APW-114 | P0 | todo | M2 | deps: APW-102, APW-104 | Test suite for parser and state machine
+- [x] APW-114 | P0 | done | M2 | deps: APW-102, APW-104 | Test suite for parser and state machine
   - AC: ≥ 40 tests covering every model ID in RESEARCH.md §5, orientation flip, `0xF` unknown battery and charging bits; runs in CI in under 60 s.
+  - Notes: **91 tests, 821 ms.** New suite covers all 11 documented model IDs, an unknown ID degrading to `Unknown (0x2999)`, the primary-pod nibble mirror, `0xF` as unknown (never 0 %), case levels above 10 % becoming unknown, the three measured ear-bit combinations, and the charging flag not disturbing the case level. Writing it caught two of my own wrong assumptions about the new bit layout.
 
 - [x] APW-115 | P1 | done | M2 | deps: APW-001 | Design the case-open popup
   - AC: `docs/design/POPUP.md` covers every state (lid open idle, one bud in ear, both in ear, charging, low battery, unknown, AirPods Max single value) at 100/150/200 % scale; layout grid, type scale, light/dark colours built on the system accent, motion timings ≤ 250 ms; reference renders in `docs/design/popup/`; owner sign-off recorded in the task.

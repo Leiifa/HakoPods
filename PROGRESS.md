@@ -18,7 +18,7 @@
 | Tasks done | 31 of 55 |
 | In review | 0 |
 | Blocked | 0 |
-| Product code | parser, watcher, reducer, advertiser table, settings, logging, selection, connection, audio, tray — 70 tests green |
+| Product code | parser, watcher, reducer, advertiser table, settings, logging, selection, connection, audio, tray — 91 tests green |
 | Toolchain | .NET SDK 8.0.427 installed |
 | Repo | git initialised 2026-10-31 — commit `de6f6d6`, no remote yet |
 
