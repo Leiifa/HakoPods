@@ -24,6 +24,7 @@ public partial class App : System.Windows.Application
     private bool _routedSinceConnect;
     private bool? _anyInEar;
     private DateTimeOffset? _earCandidateAt;
+    private bool _revertedUnworn;
     private string? _previousEndpoint;
     private TrayIconHost? _tray;
     private PopupWindow? _popup;
@@ -246,6 +247,17 @@ public partial class App : System.Windows.Application
     private void PollConnection()
     {
         var connected = IsConnected();
+
+        // Windows switches the default output to a newly linked pair on its own. If no bud is
+        // worn, that move has to be undone — otherwise music plays into a closed case. This runs
+        // on the steady-state tick, not just the transition, because the OS switch can land a
+        // second or two after the link comes up.
+        if (connected && !_revertedUnworn && _feed?.Current.AnyInEar != true && DefaultIsAirPods())
+        {
+            _revertedUnworn = true;
+            RestorePreviousOutput();
+        }
+
         if (connected == _wasConnected)
         {
             return;
@@ -282,6 +294,7 @@ public partial class App : System.Windows.Application
         {
             _routedSinceConnect = false;
             _earCandidateAt = null;
+            _revertedUnworn = false;
             RestorePreviousOutput();
         }
     }
@@ -315,6 +328,13 @@ public partial class App : System.Windows.Application
         {
             // Losing the memory is acceptable; crashing the tray is not.
         }
+    }
+
+    private static bool DefaultIsAirPods()
+    {
+        var router = new HakoPods.Core.Audio.AudioEndpointRouter();
+        var airPods = FindAirPodsEndpoint(router);
+        return airPods is not null && router.GetDefaultEndpointId() == airPods;
     }
 
     private void RestorePreviousOutput()
