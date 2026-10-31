@@ -24,7 +24,7 @@ public class DeviceStateReducerTests
         Assert.Equal(40, state.RightBatteryPercent);
         Assert.Equal(80, state.CaseBatteryPercent);
         Assert.True(state.LidOpen);
-        Assert.True(state.CaseCharging);
+        Assert.False(state.CaseCharging); // 0x8f carries no charging flag (measured)
         Assert.True(state.HasAnyBattery);
         Assert.Equal(T0, state.LastSeenAt);
     }
@@ -58,16 +58,18 @@ public class DeviceStateReducerTests
     [Fact]
     public void Reports_case_charging_from_the_packet()
     {
-        var charging = DeviceStateReducer.Apply(DeviceState.Empty, Sample(LidOpenPacket, T0));
-        // Synthetic idle packet: charging byte 0x00 clears every charging bit.
-        var idle = DeviceStateReducer.Apply(
-            charging,
-            Sample(Packet(status: 0x01, battery: 0x44, charging: 0x00), T0.AddSeconds(5)));
+        // Measured 2026-10-31, lid open, only the cable changed: 0x9a unplugged, 0xda plugged.
+        var unplugged = DeviceStateReducer.Apply(
+            DeviceState.Empty, Sample(Packet(status: 0x73, battery: 0x9a, charging: 0x9a), T0));
+        var plugged = DeviceStateReducer.Apply(
+            unplugged, Sample(Packet(status: 0x73, battery: 0x9a, charging: 0xda), T0.AddSeconds(5)));
 
-        Assert.True(charging.CaseCharging);
-        Assert.False(idle.CaseCharging);
-        Assert.False(idle.LeftCharging);
-        Assert.False(idle.RightCharging);
+        Assert.False(unplugged.CaseCharging);
+        Assert.True(plugged.CaseCharging);
+
+        // Bud charging is unproven, so it must never be asserted.
+        Assert.False(plugged.LeftCharging);
+        Assert.False(plugged.RightCharging);
     }
 
     [Fact]

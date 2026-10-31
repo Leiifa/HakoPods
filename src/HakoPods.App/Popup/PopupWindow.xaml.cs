@@ -23,7 +23,7 @@ namespace HakoPods.App.Popup;
 public partial class PopupWindow : Window
 {
     /// <summary>Set true only when a labelled capture has confirmed the charging bits.</summary>
-    private const bool ChargingMarksVerified = false;
+    private const bool ChargingMarksVerified = true;
 
     private const double ShowMs = 160;
     private const double DismissMs = 120;

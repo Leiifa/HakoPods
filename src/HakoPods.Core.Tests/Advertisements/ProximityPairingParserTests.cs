@@ -39,9 +39,11 @@ public class ProximityPairingParserTests
         Assert.Equal(40, advert.LeftBatteryPercent);
         Assert.Equal(40, advert.RightBatteryPercent);
         Assert.Equal(80, advert.CaseBatteryPercent);
-        Assert.True(advert.LeftCharging);
-        Assert.True(advert.RightCharging);
-        Assert.True(advert.CaseCharging);
+        // Measured 2026-10-31: 0x8f carries no charging flag at all (bit 6 is the only one that
+        // moves on power), and bud charging is unproven, so it must not be claimed.
+        Assert.False(advert.LeftCharging);
+        Assert.False(advert.RightCharging);
+        Assert.False(advert.CaseCharging);
         Assert.True(advert.LidOpen);
         Assert.Equal(0x05, advert.ConnectionState);
     }
@@ -96,13 +98,29 @@ public class ProximityPairingParserTests
     }
 
     [Fact]
-    public void Swaps_charging_bits_when_the_right_pod_is_primary()
+    public void Case_charging_comes_from_bit_six_of_the_flags_byte()
     {
-        // Synthetic: 0x04 is the right-charging bit; mirrored when right is primary.
+        // Captured with the lid open; only the charger differed: 0x9a unplugged, 0xda plugged.
+        var unplugged = Parse(Packet(status: 0x73, battery: 0x9a, charging: 0x9a));
+        var plugged = Parse(Packet(status: 0x73, battery: 0x9a, charging: 0xda));
+
+        Assert.NotNull(unplugged);
+        Assert.NotNull(plugged);
+        Assert.False(unplugged.CaseCharging);
+        Assert.True(plugged.CaseCharging);
+
+        // The flag sits inside the case-battery nibble, so the level must not change with it.
+        Assert.Equal(90, unplugged.CaseBatteryPercent);
+        Assert.Equal(90, plugged.CaseBatteryPercent);
+    }
+
+    [Fact]
+    public void Bud_charging_is_never_claimed_from_unverified_bits()
+    {
         var advert = Parse(Packet(status: 0x01, battery: 0x33, charging: 0x04));
 
         Assert.NotNull(advert);
-        Assert.True(advert.LeftCharging);
+        Assert.False(advert.LeftCharging);
         Assert.False(advert.RightCharging);
     }
 

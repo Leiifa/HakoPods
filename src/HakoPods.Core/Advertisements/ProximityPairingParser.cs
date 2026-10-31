@@ -20,10 +20,8 @@ public static class ProximityPairingParser
     private const byte InEarPrimary = 0x02;
     private const byte PrimaryPodLeft = 0x20;
 
-    // Charging byte flags.
-    private const byte CaseChargingBit = 0x02;
-    private const byte RightChargingBit = 0x04;
-    private const byte LeftChargingBit = 0x08;
+    // Charging byte flags. Only the case bit is measured.
+    private const byte CaseChargingFlag = 0x40;
 
     private const byte LidOpenBit = 0x08;
 
@@ -46,11 +44,19 @@ public static class ProximityPairingParser
         var leftNibble = battery & 0x0F;
         var rightNibble = (battery >> 4) & 0x0F;
 
-        var charging = payload[7];
-        var caseNibble = (charging >> 4) & 0x0F;
-        var leftCharging = (charging & LeftChargingBit) != 0;
-        var rightCharging = (charging & RightChargingBit) != 0;
-        var caseCharging = (charging & CaseChargingBit) != 0;
+        // Measured 2026-10-31 with the lid open and only the charger changing:
+        //   unplugged 0x9a / 0xaa   ->   plugged 0xda / 0xea
+        // exactly 0x40 differs, so bit 6 is the case-charging flag — and it lives inside the
+        // case-battery nibble, which is why reading the low bits as three flags produced
+        // "everything charging" from 0x0f-style values.
+        var flags = payload[7];
+        var caseCharging = (flags & CaseChargingFlag) != 0;
+        var caseNibble = (flags >> 4) & 0x0B; // mask the flag bit out of the level
+
+        // Bud charging is not proven by any capture yet; claiming it was the bug that showed
+        // bolts on an idle case. Unknown is reported as false rather than guessed.
+        var leftCharging = false;
+        var rightCharging = false;
 
         var inEarPrimary = (status & InEarPrimary) != 0;
         var inEarSecondary = (status & InEarSecondary) != 0;
@@ -59,7 +65,6 @@ public static class ProximityPairingParser
         {
             // The payload mirrors left/right when the right pod is primary.
             (leftNibble, rightNibble) = (rightNibble, leftNibble);
-            (leftCharging, rightCharging) = (rightCharging, leftCharging);
         }
 
         var lid = payload[8];
