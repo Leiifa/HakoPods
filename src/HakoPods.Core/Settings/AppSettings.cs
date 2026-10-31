@@ -14,7 +14,9 @@ public sealed record AppSettings
     /// advertisement by address is impossible, so this is only used to connect and to label.</summary>
     public string? PreferredDeviceAddress { get; init; }
 
-    public bool AutoConnectOnLidOpen { get; init; }
+    // On by default: automatic connection is the reason this app exists. Users can still
+    // switch it off, but nobody should have to find a checkbox to get the headline feature.
+    public bool AutoConnectOnLidOpen { get; init; } = true;
 
     public bool SwitchDefaultAudioEndpoint { get; init; } = true;
 

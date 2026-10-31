@@ -20,7 +20,7 @@ public class JsonSettingsStoreTests : IDisposable
 
         Assert.Equal(AppSettings.CurrentSchemaVersion, settings.SchemaVersion);
         Assert.True(settings.SwitchDefaultAudioEndpoint);
-        Assert.False(settings.AutoConnectOnLidOpen);
+        Assert.True(settings.AutoConnectOnLidOpen);
         Assert.Equal(-72, settings.NearThresholdDbm);
     }
 
@@ -54,7 +54,7 @@ public class JsonSettingsStoreTests : IDisposable
         var settings = store.Load();
 
         Assert.Equal(AppSettings.CurrentSchemaVersion, settings.SchemaVersion);
-        Assert.False(settings.AutoConnectOnLidOpen);
+        Assert.True(settings.AutoConnectOnLidOpen);
         Assert.Single(logger.Warnings);
     }
 
