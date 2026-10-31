@@ -410,10 +410,7 @@ public partial class App : System.Windows.Application
     private void PollConnection()
     {
         _feed?.EnsureAlive();
-        // Mic-on-demand is paused: the session-manager interop throws
-        // "Specified OLE variant is invalid" from GetSession, so the monitor never answers.
-        // Wiring it live would raise an exception every tick; fix the interop first.
-        // ApplyMicOnDemand();
+        ApplyMicOnDemand();
 
         // In-process revival is unproven after a radio toggle; a fresh process is not. Two failed
         // revivals mean give up on the watcher and hand over, at most once every ten minutes so a
