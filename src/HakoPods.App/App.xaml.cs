@@ -23,6 +23,7 @@ public partial class App : System.Windows.Application
     private bool _wasConnected;
     private bool _routedSinceConnect;
     private bool? _anyInEar;
+    private bool _pausedByEar;
     private DateTimeOffset? _earCandidateAt;
     private bool _revertedUnworn;
     private DateTimeOffset _lastRelaunch = DateTimeOffset.MinValue;
@@ -394,6 +395,7 @@ public partial class App : System.Windows.Application
             _routedSinceConnect = false;
             _earCandidateAt = null;
             _revertedUnworn = false;
+            _pausedByEar = false;
             RestorePreviousOutput();
         }
     }
@@ -475,7 +477,22 @@ public partial class App : System.Windows.Application
         }
 
         _anyInEar = inEar;
-        HakoPods.Core.Audio.MediaKeySender.TogglePlayPause();
+
+        if (!inEar)
+        {
+            // Removal: pause, and remember that *we* paused it.
+            HakoPods.Core.Audio.MediaKeySender.TogglePlayPause();
+            _pausedByEar = true;
+            return;
+        }
+
+        // Insertion: only resume something we paused. Toggling blindly is what paused music the
+        // user was already listening to when a bud went in.
+        if (_pausedByEar)
+        {
+            HakoPods.Core.Audio.MediaKeySender.TogglePlayPause();
+            _pausedByEar = false;
+        }
     }
 
     /// <summary>Ear state older than this is not worth acting on.</summary>
