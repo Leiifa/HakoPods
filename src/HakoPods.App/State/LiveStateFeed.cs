@@ -14,8 +14,8 @@ namespace HakoPods.App.State;
 /// </summary>
 public sealed class LiveStateFeed : IAsyncDisposable
 {
-    private readonly WinRtAdvertisementWatcher _watcher = new();
-    private readonly ProximityPairingService _service;
+    private WinRtAdvertisementWatcher _watcher = new();
+    private ProximityPairingService _service;
     private readonly Dispatcher _dispatcher;
     private readonly DispatcherTimer _expiry;
     private readonly ulong? _address;
@@ -54,7 +54,8 @@ public sealed class LiveStateFeed : IAsyncDisposable
         _cancellation = new CancellationTokenSource();
         _service.Start();
         _expiry.Start();
-        _ = Task.Run(() => PumpAsync(_cancellation.Token));
+        var service = _service;
+        _ = Task.Run(() => PumpAsync(service, _cancellation.Token));
     }
 
     /// <summary>
@@ -90,8 +91,24 @@ public sealed class LiveStateFeed : IAsyncDisposable
             return;
         }
 
-        _service.Stop();
+        // A radio toggle invalidates the WinRT watcher object itself: the same instance will not
+        // restart, and no callback says so. Only a fresh watcher and service can recover.
+        var oldService = _service;
+        var oldWatcher = _watcher;
+        var oldCancellation = _cancellation;
+
+        _watcher = new WinRtAdvertisementWatcher();
+        _service = new ProximityPairingService(_watcher);
+        _cancellation = new CancellationTokenSource();
+
         _service.Start();
+        var service = _service;
+        _ = Task.Run(() => PumpAsync(service, _cancellation.Token));
+
+        oldCancellation?.Cancel();
+        oldCancellation?.Dispose();
+        _ = oldService.DisposeAsync();
+        oldWatcher.Dispose();
     }
 
     public async ValueTask DisposeAsync()
@@ -109,11 +126,11 @@ public sealed class LiveStateFeed : IAsyncDisposable
         _cancellation?.Dispose();
     }
 
-    private async Task PumpAsync(CancellationToken cancellationToken)
+    private async Task PumpAsync(ProximityPairingService service, CancellationToken cancellationToken)
     {
         try
         {
-            await foreach (var sample in _service.ReadAllAsync(cancellationToken).ConfigureAwait(false))
+            await foreach (var sample in service.ReadAllAsync(cancellationToken).ConfigureAwait(false))
             {
                 // v1 is single-pair: ignore anything that is not the configured device, so a
                 // neighbour's AirPods cannot overwrite the tray.
