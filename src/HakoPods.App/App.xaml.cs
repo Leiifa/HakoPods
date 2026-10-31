@@ -246,6 +246,8 @@ public partial class App : System.Windows.Application
 
     private void PollConnection()
     {
+        _feed?.EnsureAlive();
+
         var connected = IsConnected();
 
         // Windows switches the default output to a newly linked pair on its own. If no bud is

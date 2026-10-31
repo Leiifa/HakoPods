@@ -22,6 +22,7 @@ public sealed class LiveStateFeed : IAsyncDisposable
     private readonly int _nearThresholdDbm;
     private CancellationTokenSource? _cancellation;
     private DeviceState _state = DeviceState.Empty;
+    private DateTimeOffset _lastSampleAt = DateTimeOffset.MinValue;
     private bool _disposed;
 
     public LiveStateFeed(ulong? address, Dispatcher dispatcher, int nearThresholdDbm = -72)
@@ -54,6 +55,27 @@ public sealed class LiveStateFeed : IAsyncDisposable
         _service.Start();
         _expiry.Start();
         _ = Task.Run(() => PumpAsync(_cancellation.Token));
+    }
+
+    /// <summary>
+    /// Kicks the watcher when it has gone quiet for too long. The service revives itself on a
+    /// stopped callback, but turning the radio off and on can leave the new watcher failing to
+    /// start while nothing reports a stop — the app then sits deaf forever, showing "No AirPods
+    /// nearby" while a bud is in an ear.
+    /// </summary>
+    public void EnsureAlive(TimeSpan? after = null)
+    {
+        if (_disposed || _cancellation is null)
+        {
+            return;
+        }
+
+        var limit = after ?? TimeSpan.FromSeconds(30);
+        if (DateTimeOffset.UtcNow - _lastSampleAt > limit)
+        {
+            Restart();
+            _lastSampleAt = DateTimeOffset.UtcNow;
+        }
     }
 
     /// <summary>
@@ -136,6 +158,7 @@ public sealed class LiveStateFeed : IAsyncDisposable
     private void Publish(DeviceState next)
     {
         _state = next;
+        _lastSampleAt = DateTimeOffset.UtcNow;
         StateChanged?.Invoke(this, next);
     }
 }
