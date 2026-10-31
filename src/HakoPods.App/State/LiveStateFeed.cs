@@ -82,7 +82,23 @@ public sealed class LiveStateFeed : IAsyncDisposable
                     continue;
                 }
 
-                _dispatcher.Invoke(() => Publish(DeviceStateReducer.Apply(_state, sample)));
+                _dispatcher.Invoke(() =>
+                {
+                    // Windows re-delivers cached adverts after a wake, and they carry the ear
+                    // and lid bits from before the case closed. Applying one would flip the
+                    // popup back to a stale state, so older packets are dropped.
+                    if (sample.ReceivedAt < DateTimeOffset.UtcNow - TimeSpan.FromSeconds(5))
+                    {
+                        return;
+                    }
+
+                    if (sample.ReceivedAt < _state.LastSeenAt)
+                    {
+                        return;
+                    }
+
+                    Publish(DeviceStateReducer.Apply(_state, sample));
+                });
             }
         }
         catch (OperationCanceledException)

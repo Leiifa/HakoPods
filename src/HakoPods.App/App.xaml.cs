@@ -68,7 +68,11 @@ public partial class App : System.Windows.Application
         // so filtering on it would discard every packet. v1 accepts any Apple proximity-pairing
         // advert, which is correct while exactly one pair is in range.
         _feed = new LiveStateFeed(address: null, Dispatcher);
-        _feed.StateChanged += (_, state) => _tray.ApplyState(state);
+        _feed.StateChanged += (_, state) =>
+        {
+            _tray.ApplyState(state);
+            OnStateChanged(state);
+        };
         _feed.Start();
 
         // Development aid: `HakoPods.exe --demo-popup` renders the card once so the layout can be
@@ -134,6 +138,59 @@ public partial class App : System.Windows.Application
             ? address
             : null;
     }
+
+    private DateTimeOffset _lastPopupAt = DateTimeOffset.MinValue;
+    private bool _lidWasOpen;
+
+    /// <summary>
+    /// Fires the card on the closed → open edge only: opening the lid is the moment the user
+    /// wants to know the levels, and firing on every advertisement would be a slideshow.
+    /// Suppressed for ten seconds after a dismissal, and when a fullscreen app owns the screen.
+    /// </summary>
+    private void OnStateChanged(HakoPods.Core.State.DeviceState state)
+    {
+        var openedNow = state.LidOpen && !_lidWasOpen;
+        _lidWasOpen = state.LidOpen;
+
+        if (!openedNow || !state.IsPresent)
+        {
+            return;
+        }
+
+        if (DateTimeOffset.UtcNow - _lastPopupAt < TimeSpan.FromSeconds(10))
+        {
+            return;
+        }
+
+        if (IsFullscreenAppActive())
+        {
+            return;
+        }
+
+        _lastPopupAt = DateTimeOffset.UtcNow;
+        ShowPopup(state);
+    }
+
+    /// <summary>Shell tells us when a game or presentation owns the screen; do not interrupt it.</summary>
+    private static bool IsFullscreenAppActive()
+    {
+        try
+        {
+            if (SHQueryUserNotificationState(out var state) != 0)
+            {
+                return false;
+            }
+
+            return state is 2 or 3 or 4; // busy, D3D fullscreen, presentation mode
+        }
+        catch (DllNotFoundException)
+        {
+            return false;
+        }
+    }
+
+    [System.Runtime.InteropServices.DllImport("shell32.dll")]
+    private static extern int SHQueryUserNotificationState(out int state);
 
     private void ShowPopup(HakoPods.Core.State.DeviceState state)
     {
