@@ -282,3 +282,28 @@ the decision is a single line in ADR-011.
 Proceed to M2 **if** APW-015 and APW-017 pass. If either fails, proceed anyway with the
 affected goal removed from the README rather than pretending the feature exists — the core
 experience (popup, battery, ear detection) does not depend on them.
+
+### Measurement 15 — the charging byte does not move when charging starts (2026-10-31)
+
+Two labelled captures, same pair, right bud worn throughout.
+
+| Ground truth | Advertisers seen | status | batt | chg byte |
+|---|---|---|---|---|
+| Case **not** charging | `0x6604…76FD` (−42) | `0x73` | `0xaa` | `0x99` |
+| | `0x6E95…2B57` (−58) | `0x02` | `0xfa` | `0x8f` |
+| Case **charging** | `0x6E95…2B57` (−54) | `0x02` | `0xfa` | **`0x8f`** |
+
+The charging byte is **byte-identical** before and after the case went on power, and the case's
+own advertiser stopped appearing at all while charging.
+
+So:
+
+1. Charging is **not** in the low bits of `payload[7]`. Our parser read three independent flags
+   there and produced "everything charging" from `0x8f`, which is wrong — `0x0f`-style values
+   look like a "nothing applies" marker, not a bitfield of three flags.
+2. Charging cannot be inferred from the bud advertiser at all. If it is reported, it comes from
+   the case advertiser — which was absent during the charging capture.
+3. The charging mark therefore stays disabled (`ChargingMarksVerified = false`). A future capture
+   needs the case both open and on power, so its advertiser is present.
+
+
