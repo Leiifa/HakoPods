@@ -7,7 +7,7 @@
 **Last updated:** 2026-10-31 15:05 (UTC+7) · **By:** Hermes
 **Phase:** M2 at 11 of 16 — tray, popup and lid trigger shipped and confirmed; settings and diagnostics remain
 **Current milestone:** M2
-**Current task:** tray must reflect the *link*, not advertisements — the buds keep advertising from a closed case while disconnected, so battery looked live. Fixed: when the link is down the tray shows not-connected once, and packets resume control when it returns.
+**Current task:** auto-disconnect on lid close is *reverted* — dropping the link made Windows reconnect the preferred device, producing a reconnect war with the lid shut. It needs an explicit "stay disconnected until the lid opens" state instead of fighting the OS. The tray still hides battery when no audio endpoint exists.
 
 ---
 

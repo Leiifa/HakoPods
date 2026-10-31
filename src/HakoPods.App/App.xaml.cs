@@ -577,60 +577,17 @@ public partial class App : System.Windows.Application
         }
         else
         {
-            if (DateTimeOffset.UtcNow - _lastSampleAt > TimeSpan.FromSeconds(45) && _anyInEar != true)
-            {
-                // Connected, no advertisement for 45 s, nothing in an ear: the buds are in the case
-                // with the lid shut. Windows keeps the link up regardless; drop it like macOS does.
-                _ = Task.Run(async () =>
-                {
-                    try
-                    {
-                        if (_address is { } gone)
-                        {
-                            await _connection!.DisconnectAsync(gone).ConfigureAwait(false);
-                        }
-
-                        // Windows now says "not connected"; clear the card's numbers so the tray
-                        // stops advertising a battery it can no longer observe.
-                        var stale = (_lastState ?? HakoPods.Core.State.DeviceState.Empty) with
-                        {
-                            IsPresent = false,
-                            LeftBatteryPercent = null,
-                            RightBatteryPercent = null,
-                            CaseBatteryPercent = null,
-                            LeftCharging = false,
-                            RightCharging = false,
-                            CaseCharging = false,
-                            LeftInEar = false,
-                            RightInEar = false,
-                        };
-
-                        var tray = _tray;
-                        if (tray is not null)
-                        {
-                            _ = Dispatcher.BeginInvoke(() => tray.ApplyState(stale));
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        // Already asleep or gone; nothing to clear.
-                    }
-                });
-            }
-
-            // Link is down, but the buds may still advertise from inside a closed case. Battery
-            // from a disconnected pair must not be presented as live state: show "not connected".
-            // The audio endpoint is the honest signal: fConnected reports true while Windows itself
-        // says "not connected" (measured repeatedly on this pair), so a link rule built on it
-        // never fires.
-        var hasAudioEndpoint = FindAirPodsEndpoint(new HakoPods.Core.Audio.AudioEndpointRouter()) is not null;
-
-        if (!hasAudioEndpoint && !_trayShowsDisconnected)
+            // Silence-disconnect removed: Windows reconnects the preferred device as soon as the
+            // link drops, so the rule produced a reconnect war — the pair churned with the lid
+            // shut. Auto-disconnect needs an explicit "stay gone until the lid opens" state, not a
+            // fight with the OS for the link.
+            //
+            // The tray still needs to stop showing battery for a pair that has no audio endpoint.
+            if (FindAirPodsEndpoint(new HakoPods.Core.Audio.AudioEndpointRouter()) is null && !_trayShowsDisconnected)
             {
                 _trayShowsDisconnected = true;
                 ApplyDisconnectedTrayState();
             }
-
             _routedSinceConnect = false;
             _earCandidateAt = null;
             _revertedUnworn = false;
