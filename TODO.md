@@ -194,6 +194,7 @@ hardware, and kill the project early if the driver-free path does not hold up.
   - Notes: interop ported from the APW-017 spike (`IPolicyConfig` + `IMMDeviceEnumerator`, vtable order preserved) into `HakoPods.Core.Audio`, plus `AudioEndpointRouter` (list render endpoints, read the console default, set all three roles — console-only switching leaves VoIP on the old device). Wired to the lid-open edge, gated on `SwitchDefaultAudioEndpoint`. **Incomplete by design:** it switches to `PreferredAudioEndpointId`, which nothing can set yet — endpoint ids are the only stable handle Windows exposes, so the device picker has to learn one first. Until then this path is a no-op, and the restore half is APW-205.
 
 - [x] APW-204 | P1 | done | M3 | deps: APW-016 | Microphone policy ("stereo always")
+  - Mic on demand (2026-10-31): started, then paused. The session monitor's COM interop throws "Specified OLE variant is invalid" from `GetSession`, so the capture signal never arrives; the call is commented out and the crash log is clean. Needs the enumerator interfaces re-declared with the concrete session type, then a real recording app to prove the positive path.
   - AC: toggle disables HFP so no app can force call quality; verified with Teams and a browser mic test; UI warns that the AirPods mic becomes unavailable; revert restores HFP.
 
 - [x] APW-205 | P1 | done | M3 | deps: APW-203 | Restore the previous endpoint on disconnect

@@ -26,6 +26,9 @@ public partial class App : System.Windows.Application
     private bool _pausedByEar;
     private DateTimeOffset? _earCandidateAt;
     private bool _revertedUnworn;
+    private readonly HakoPods.Core.Audio.CaptureSessionMonitor _capture = new();
+    private bool _hfpUp;
+    private DateTimeOffset _captureIdleSince = DateTimeOffset.MinValue;
     private DateTimeOffset _lastRelaunch = DateTimeOffset.MinValue;
     private CancellationTokenSource? _radioWatch;
     private bool _radioToggled;
@@ -356,9 +359,61 @@ public partial class App : System.Windows.Application
         _anyInEar = null;
     }
 
+    /// <summary>
+    /// Mic on demand: while the stereo policy is on, the hands-free profile is raised only while
+    /// an app is actually capturing, and dropped again once it has been quiet for five seconds.
+    /// Music therefore stays stereo all day and only a call pays the narrowband cost.
+    /// </summary>
+    private void ApplyMicOnDemand()
+    {
+        if (!_settings.DisableHandsFreeProfile || _address is not { } address || _connection is null || !IsConnected())
+        {
+            return;
+        }
+
+        var capturing = _capture.IsAnyCaptureActive();
+
+        if (capturing)
+        {
+            _captureIdleSince = DateTimeOffset.MinValue;
+
+            if (!_hfpUp)
+            {
+                _hfpUp = true;
+                _ = Task.Run(() => _connection.EnableHandsFreeAsync(address));
+            }
+
+            return;
+        }
+
+        if (!_hfpUp)
+        {
+            return;
+        }
+
+        if (_captureIdleSince == DateTimeOffset.MinValue)
+        {
+            _captureIdleSince = DateTimeOffset.UtcNow;
+            return;
+        }
+
+        if (DateTimeOffset.UtcNow - _captureIdleSince < TimeSpan.FromSeconds(5))
+        {
+            return;
+        }
+
+        _hfpUp = false;
+        _captureIdleSince = DateTimeOffset.MinValue;
+        _ = Task.Run(() => _connection.DisableHandsFreeAsync(address));
+    }
+
     private void PollConnection()
     {
         _feed?.EnsureAlive();
+        // Mic-on-demand is paused: the session-manager interop throws
+        // "Specified OLE variant is invalid" from GetSession, so the monitor never answers.
+        // Wiring it live would raise an exception every tick; fix the interop first.
+        // ApplyMicOnDemand();
 
         // In-process revival is unproven after a radio toggle; a fresh process is not. Two failed
         // revivals mean give up on the watcher and hand over, at most once every ten minutes so a

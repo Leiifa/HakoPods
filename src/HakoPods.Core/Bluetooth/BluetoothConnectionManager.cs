@@ -58,6 +58,10 @@ public sealed class BluetoothConnectionManager : IDisposable
     /// removes the microphone endpoints, so Windows cannot drop A2DP into narrowband headset mode
     /// when an app grabs the mic — the "stereo always" policy.
     /// </summary>
+    /// <summary>Brings the microphone path back while an app is recording.</summary>
+    public Task<ConnectionResult> EnableHandsFreeAsync(ulong address, CancellationToken cancellationToken = default) =>
+        RunAsync(address, Win32BluetoothNative.HandsfreeService, enable: true, cancellationToken);
+
     public Task<ConnectionResult> DisableHandsFreeAsync(ulong address, CancellationToken cancellationToken = default) =>
         RunAsync(address, Win32BluetoothNative.HandsfreeService, enable: false, cancellationToken);
 
