@@ -380,39 +380,7 @@ public partial class App : System.Windows.Application
     /// an app is actually capturing, and dropped again once it has been quiet for five seconds.
     /// Music therefore stays stereo all day and only a call pays the narrowband cost.
     /// </summary>
-    /// <summary>
-    /// Finds the stereo endpoint and makes it default, retrying while Windows is still publishing
-    /// it. Gives up after ~3 s rather than leaving the system on a device that is not there.
-    /// </summary>
-    private static async Task RestoreStereoEndpointAsync()
-    {
-        var router = new HakoPods.Core.Audio.AudioEndpointRouter();
-
-        for (var attempt = 0; attempt < 10; attempt++)
-        {
-            await Task.Delay(300).ConfigureAwait(false);
-
-            if (router.FindEndpointByName("Headphones") is { } stereo && router.TrySetDefault(stereo))
-            {
-                return;
-            }
-        }
-    }
-
     private void ApplyMicOnDemand()
-    {
-        try
-        {
-            ApplyMicOnDemandCore();
-        }
-        catch (Exception)
-        {
-            // Endpoints vanish mid-flight when a profile flips; a transient device error must not
-            // become a crash report every two seconds.
-        }
-    }
-
-    private void ApplyMicOnDemandCore()
     {
         if (!_settings.DisableHandsFreeProfile || _address is not { } address || _connection is null || !IsConnected())
         {
@@ -428,19 +396,7 @@ public partial class App : System.Windows.Application
             if (!_hfpUp)
             {
                 _hfpUp = true;
-                _ = Task.Run(async () =>
-                {
-                    try
-                    {
-                    await _connection.EnableHandsFreeAsync(address).ConfigureAwait(false);
-
-
-                    }
-                    catch (Exception)
-                    {
-                        // Transient device errors are expected while profiles flip.
-                    }
-                });
+                _ = Task.Run(() => _connection.EnableHandsFreeAsync(address));
             }
 
             return;
@@ -457,38 +413,20 @@ public partial class App : System.Windows.Application
             return;
         }
 
-        if (DateTimeOffset.UtcNow - _captureIdleSince < TimeSpan.FromSeconds(1.5))
+        if (DateTimeOffset.UtcNow - _captureIdleSince < TimeSpan.FromSeconds(5))
         {
             return;
         }
 
         _hfpUp = false;
         _captureIdleSince = DateTimeOffset.MinValue;
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-            await _connection.DisableHandsFreeAsync(address).ConfigureAwait(false);
-
-            }
-            catch (Exception)
-            {
-                // Same: a device can disappear between the check and the call.
-            }
-        });
+        _ = Task.Run(() => _connection.DisableHandsFreeAsync(address));
     }
 
     private void PollConnection()
     {
         _feed?.EnsureAlive();
         ApplyMicOnDemand();
-
-        if (!_routedSinceConnect && _feed?.Current is { } current && current.AnyInEar && IsConnected())
-        {
-            _routedSinceConnect = true;
-            RememberCurrentOutput();
-            RouteAudioIfConfigured();
-        }
 
         // In-process revival is unproven after a radio toggle; a fresh process is not. Two failed
         // revivals mean give up on the watcher and hand over, at most once every ten minutes so a
@@ -525,9 +463,28 @@ public partial class App : System.Windows.Application
             // Only remember where audio was; routing waits until a bud is actually worn. Windows
             // links the pair as soon as the lid opens, buds in the case included, and switching
             // output then steals audio for nobody.
-            // HFP is owned entirely by the mic-on-demand policy: disabling it here too raced that
-            // policy and tore down the stereo profile mid-call.
             RememberCurrentOutput();
+
+            // Stereo is the default posture, but only when nothing is recording: disabling HFP
+            // unconditionally raced the mic-on-demand policy and killed the mic a tick after it
+            // was raised.
+            if (_settings.DisableHandsFreeProfile && !_capture.IsAnyCaptureActive())
+            {
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        if (_address is { } address && _connection is not null)
+                        {
+                            await _connection.DisableHandsFreeAsync(address).ConfigureAwait(false);
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        // The policy is a preference; failing it must not disturb playback.
+                    }
+                });
+            }
         }
         else
         {
