@@ -490,7 +490,12 @@ public partial class App : System.Windows.Application
     private void PollConnection()
     {
         _feed?.EnsureAlive();
-        ApplyMicOnDemand();
+        // Mic-on-demand is OFF. Measured across three call cycles on this adapter: raising the
+        // hands-free profile tears A2DP down, and lowering it never republishes the stereo
+        // endpoint (the service reports already-enabled while the endpoint is gone). The result
+        // was a call with a working mic and silence afterwards. Reliability beats the feature:
+        // stereo is kept, and the AirPods microphone is simply unavailable, as before.
+        // ApplyMicOnDemand();
 
         if (!_routedSinceConnect && _feed?.Current is { } current && current.AnyInEar && IsConnected())
         {
