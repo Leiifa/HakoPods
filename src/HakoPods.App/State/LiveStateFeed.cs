@@ -43,6 +43,21 @@ public sealed class LiveStateFeed : IAsyncDisposable
 
     public event EventHandler<DeviceState>? StateChanged;
 
+    /// <summary>
+    /// The state only if it is recent enough to show. A tray click cannot force the buds to
+    /// advertise, so the honest answer when nothing has arrived for a while is "no reading",
+    /// not the number that happens to be lying in memory.
+    /// </summary>
+    public DeviceState Fresh(TimeSpan maxAge)
+    {
+        if (_state.LastSeenAt is { } seen && DateTimeOffset.UtcNow - seen <= maxAge)
+        {
+            return _state;
+        }
+
+        return DeviceState.Empty with { ModelName = _state.ModelName };
+    }
+
     public DeviceState Current => _state;
 
     public void Start()

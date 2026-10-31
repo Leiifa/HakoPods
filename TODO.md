@@ -130,6 +130,7 @@ hardware, and kill the project early if the driver-free path does not hold up.
   - Notes: implement `docs/design/POPUP.md` exactly — 336×206 DIP, Inter bundled (subset + OFL notice), green/red rails with `Low` text, em dash for unknown, 160/120 ms motion. Do not invent styling.
 
 - [x] APW-109 | P0 | done | M2 | deps: APW-104, APW-108 | Popup trigger logic
+  - Staleness (2026-10-31): a tray click cannot force an advertisement, so the card now takes the freshest snapshot and, past 8 s, renders em dashes with `Last reading` instead of a number that happens to be in memory.
   - AC: fires on the lid-open transition only, with a 10 s cooldown after disconnect and suppression in fullscreen apps; p95 ≤ 1.5 s from lid open over 20 trials; ignores adverts older than 5 s.
   - Owner rule: the card is for the paired pair only. Adverts weaker than the near band (`NearThresholdDbm`, default −72 dBm) are dropped, and the trigger also requires the configured device to still be remembered by this PC — so a neighbour's AirPods cannot summon a card.
   - **Closed 2026-10-31, confirmed by the owner: the ear now reads correctly.** Reliability note: p95 over 20 lid opens was never measured. Observed latencies 409 ms and 1.2 s, and the trigger has never fired on a wrong edge; the p95 target stays in the AC as an aspiration rather than evidence.

@@ -655,6 +655,10 @@ public partial class App : System.Windows.Application
     private void ShowPopup(HakoPods.Core.State.DeviceState state)
     {
         _popup ??= new PopupWindow();
+
+        // Prefer the freshest snapshot; fall back to the one the click carried if the feed is
+        // older than this, which the window renders as em dashes and "Last reading".
+        state = _feed?.Fresh(TimeSpan.FromSeconds(8)) ?? state;
         _popup.AccentBrush = AccentBrush();
         _popup.Apply(state, IsDarkTheme(), IsConnected());
 
