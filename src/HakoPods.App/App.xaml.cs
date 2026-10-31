@@ -27,6 +27,11 @@ public partial class App : System.Windows.Application
     // Advertisements are the only sign of life the buds give us. Silence while the link is up
     // means they are in the case: closing the lid produces no packet at all, because they sleep.
     private DateTimeOffset _lastSampleAt = DateTimeOffset.MinValue;
+
+    // Last state the tray was shown. Needed because a disconnect produces no packet: without
+    // this the tray keeps displaying the battery from the final advertisement, so Windows says
+    // "not connected" while the icon still claims 60 %.
+    private HakoPods.Core.State.DeviceState? _lastState;
     private bool _pausedByEar;
     private DateTimeOffset? _earCandidateAt;
     private bool _revertedUnworn;
@@ -113,6 +118,7 @@ public partial class App : System.Windows.Application
         _feed.StateChanged += (_, state) =>
         {
             _lastSampleAt = DateTimeOffset.UtcNow;
+            _lastState = state;
             _tray.ApplyState(state);
             OnStateChanged(state);
             PauseOnEarChange(state);
@@ -547,7 +553,41 @@ public partial class App : System.Windows.Application
             {
                 // Connected, no advertisement for 45 s, nothing in an ear: the buds are in the case
                 // with the lid shut. Windows keeps the link up regardless; drop it like macOS does.
-                _ = Task.Run(() => _connection?.DisconnectAsync(_address!.Value));
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        if (_address is { } gone)
+                        {
+                            await _connection!.DisconnectAsync(gone).ConfigureAwait(false);
+                        }
+
+                        // Windows now says "not connected"; clear the card's numbers so the tray
+                        // stops advertising a battery it can no longer observe.
+                        var stale = (_lastState ?? HakoPods.Core.State.DeviceState.Empty) with
+                        {
+                            IsPresent = false,
+                            LeftBatteryPercent = null,
+                            RightBatteryPercent = null,
+                            CaseBatteryPercent = null,
+                            LeftCharging = false,
+                            RightCharging = false,
+                            CaseCharging = false,
+                            LeftInEar = false,
+                            RightInEar = false,
+                        };
+
+                        var tray = _tray;
+                        if (tray is not null)
+                        {
+                            _ = Dispatcher.BeginInvoke(() => tray.ApplyState(stale));
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        // Already asleep or gone; nothing to clear.
+                    }
+                });
             }
 
             _routedSinceConnect = false;
