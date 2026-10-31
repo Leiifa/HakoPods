@@ -205,17 +205,52 @@ public partial class App : System.Windows.Application
     /// </summary>
     private void RouteAudioIfConfigured()
     {
-        if (!_settings.SwitchDefaultAudioEndpoint || _settings.PreferredAudioEndpointId is not { } endpoint)
+        if (!_settings.SwitchDefaultAudioEndpoint)
         {
             return;
         }
 
         var router = new HakoPods.Core.Audio.AudioEndpointRouter();
-        if (!router.TrySetDefault(endpoint))
+        var target = FindAirPodsEndpoint(router);
+
+        // Never force an arbitrary saved id: an earlier version did, and pushed playback back to
+        // the speakers a second after Windows had correctly switched to the buds.
+        if (target is null)
         {
-            LastConnectError = "could not switch playback to the saved endpoint";
+            return;
+        }
+
+        if (!router.TrySetDefault(target))
+        {
+            LastConnectError = "could not switch playback to the AirPods endpoint";
+            return;
+        }
+
+        LastConnectError = null;
+
+        if (_settings.PreferredAudioEndpointId != target && _store is not null)
+        {
+            _settings = _settings with { PreferredAudioEndpointId = target };
+            try
+            {
+                _store.Save(_settings);
+            }
+            catch (Exception)
+            {
+                // Remembering the id is a convenience; failing to persist it must not matter.
+            }
         }
     }
+
+    /// <summary>
+    /// Endpoint ids are opaque and change per pairing, so the only handle a user recognises is
+    /// the friendly name. Matching "AirPods" is a heuristic, but it is the honest one available.
+    /// </summary>
+    private static string? FindAirPodsEndpoint(HakoPods.Core.Audio.AudioEndpointRouter router) =>
+        router.ListRenderEndpointsDetailed()
+            .Where(e => e.Name is not null && e.Name.Contains("AirPods", StringComparison.OrdinalIgnoreCase))
+            .Select(e => e.Id)
+            .FirstOrDefault();
 
     /// <summary>
     /// Lid open is when Windows is most likely to connect by itself (0–1 s, APW-013), so this is a
