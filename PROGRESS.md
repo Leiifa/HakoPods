@@ -7,7 +7,7 @@
 **Last updated:** 2026-10-31 15:05 (UTC+7) · **By:** Hermes
 **Phase:** M2 at 11 of 16 — tray, popup and lid trigger shipped and confirmed; settings and diagnostics remain
 **Current milestone:** M2
-**Current task:** APW-206 is in review — needs a fullscreen check (a video or game full-screen, then open the lid; no card should appear)
+**Current task:** tray must reflect the *link*, not advertisements — the buds keep advertising from a closed case while disconnected, so battery looked live. Fixed: when the link is down the tray shows not-connected once, and packets resume control when it returns.
 
 ---
 

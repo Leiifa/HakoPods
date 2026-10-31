@@ -32,6 +32,9 @@ public partial class App : System.Windows.Application
     // this the tray keeps displaying the battery from the final advertisement, so Windows says
     // "not connected" while the icon still claims 60 %.
     private HakoPods.Core.State.DeviceState? _lastState;
+
+    // One-shot guard: the tray is told "disconnected" once, not every two seconds.
+    private bool _trayShowsDisconnected;
     private bool _pausedByEar;
     private DateTimeOffset? _earCandidateAt;
     private bool _revertedUnworn;
@@ -119,6 +122,7 @@ public partial class App : System.Windows.Application
         {
             _lastSampleAt = DateTimeOffset.UtcNow;
             _lastState = state;
+            _trayShowsDisconnected = false;
             _tray.ApplyState(state);
             OnStateChanged(state);
             PauseOnEarChange(state);
@@ -484,6 +488,30 @@ public partial class App : System.Windows.Application
         });
     }
 
+    private void ApplyDisconnectedTrayState()
+    {
+        var tray = _tray;
+        if (tray is null)
+        {
+            return;
+        }
+
+        var stale = (_lastState ?? HakoPods.Core.State.DeviceState.Empty) with
+        {
+            IsPresent = false,
+            LeftBatteryPercent = null,
+            RightBatteryPercent = null,
+            CaseBatteryPercent = null,
+            LeftCharging = false,
+            RightCharging = false,
+            CaseCharging = false,
+            LeftInEar = false,
+            RightInEar = false,
+        };
+
+        _ = Dispatcher.BeginInvoke(() => tray.ApplyState(stale));
+    }
+
     private void PollConnection()
     {
         _feed?.EnsureAlive();
@@ -588,6 +616,14 @@ public partial class App : System.Windows.Application
                         // Already asleep or gone; nothing to clear.
                     }
                 });
+            }
+
+            // Link is down, but the buds may still advertise from inside a closed case. Battery
+            // from a disconnected pair must not be presented as live state: show "not connected".
+            if (!_trayShowsDisconnected)
+            {
+                _trayShowsDisconnected = true;
+                ApplyDisconnectedTrayState();
             }
 
             _routedSinceConnect = false;
