@@ -474,6 +474,10 @@ public partial class App : System.Windows.Application
             try
             {
             await _connection.DisableHandsFreeAsync(address).ConfigureAwait(false);
+
+            // Dropping the profile unpublishes the headset endpoint and republishes stereo; without
+            // this the default can be left on a device that just disappeared — silence after a call.
+            await RestoreStereoEndpointAsync().ConfigureAwait(false);
             }
             catch (Exception)
             {
