@@ -26,7 +26,7 @@
         <StackPanel Grid.Row="2" Margin="0,14,0,0">
             <CheckBox x:Name="SwitchAudio" Content="Move playback to my AirPods when they connect"
                       FontSize="13" Margin="0,0,0,8" />
-            <CheckBox x:Name="StartWithWindows" Content="Launch when I sign in"
+            <CheckBox x:Name="StartWithWindows" Content="Launch HakoPods when Windows starts"
                       FontSize="13" Margin="0,0,0,8" />
             <CheckBox x:Name="AutoConnect" Content="Connect my AirPods when the lid opens"
                       FontSize="13" Margin="0,0,0,14" />
