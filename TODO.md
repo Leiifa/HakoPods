@@ -90,8 +90,8 @@ hardware, and kill the project early if the driver-free path does not hold up.
 ## M2 — Driver-free core MVP
 
 - [x] APW-101 | P0 | done | M2 | deps: APW-019 | Create the solution skeleton and CI
-  - AC: `src/AirPods.Core`, `src/AirPods.App` (WPF), `src/AirPods.Core.Tests`; `dotnet build` and `dotnet test` pass from a clean clone; Directory.Build.props sets Nullable/LangVersion/TreatWarningsAsErrors; CI runs on windows-latest.
-  - Notes: `AirPods.sln` with Core (net8.0), App (WPF, PerMonitorV2 manifest, exits cleanly until the tray lands) and Core.Tests (xUnit). `dotnet build` 0 warnings / 0 errors; `dotnet test` 2/2 pass. `Directory.Build.props` sets Nullable, LangVersion latest, TreatWarningsAsErrors. CI workflow at `.github/workflows/ci.yml` (build + test + task checker) — written but not yet run on GitHub, since the repo has no remote.
+  - AC: `src/HakoPods.Core`, `src/HakoPods.App` (WPF), `src/HakoPods.Core.Tests`; `dotnet build` and `dotnet test` pass from a clean clone; Directory.Build.props sets Nullable/LangVersion/TreatWarningsAsErrors; CI runs on windows-latest.
+  - Notes: `HakoPods.sln` with Core (net8.0), App (WPF, PerMonitorV2 manifest, exits cleanly until the tray lands) and Core.Tests (xUnit). `dotnet build` 0 warnings / 0 errors; `dotnet test` 2/2 pass. `Directory.Build.props` sets Nullable, LangVersion latest, TreatWarningsAsErrors. CI workflow at `.github/workflows/ci.yml` (build + test + task checker) — written but not yet run on GitHub, since the repo has no remote.
 
 - [x] APW-102 | P0 | done | M2 | deps: APW-101 | Implement the proximity-pairing parser with fixtures
   - AC: `byte[] → AirPodsAdvertisement` (model, L/R/case %, charging, in-ear, lid, primary pod, connection state); ≥ 8 fixture tests including flipped orientation and unknown model; parser has no hardware dependency and 100 % branch coverage.

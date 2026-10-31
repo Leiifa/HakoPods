@@ -5,7 +5,7 @@ shape so agents do not invent competing structures. See ADR-002 and ADR-011.
 
 ```
 src/
-├─ AirPods.Core/         # net8.0 — no UI, no WPF references
+├─ HakoPods.Core/         # net8.0 — no UI, no WPF references
 │  ├─ Advertisements/    # proximity-pairing parser, model table, fixtures
 │  ├─ Devices/           # paired-device discovery, identity policy
 │  ├─ State/             # DeviceState model + pure reducer
@@ -13,19 +13,19 @@ src/
 │  ├─ Audio/             # IAudioEndpointSwitcher, media control (SMTC)
 │  ├─ Settings/          # settings store, schema, migration
 │  └─ Interop/           # P/Invoke + COM only (bthprops, IPolicyConfig, MMDevice)
-├─ AirPods.App/          # net8.0-windows — WPF tray app
+├─ HakoPods.App/          # net8.0-windows — WPF tray app
 │  ├─ Tray/              # NotifyIcon, menus, tooltip
 │  ├─ Popup/             # borderless no-activate window, animation, placement
 │  ├─ SettingsUi/        # settings pages
 │  └─ App.xaml           # composition root, single instance, DI
-└─ AirPods.Core.Tests/   # xUnit — parser fixtures, reducer, settings, fake interop
+└─ HakoPods.Core.Tests/   # xUnit — parser fixtures, reducer, settings, fake interop
 ```
 
 ## Dependency direction
 
 ```
-AirPods.App ──▶ AirPods.Core
-AirPods.Core.Tests ──▶ AirPods.Core
+HakoPods.App ──▶ HakoPods.Core
+HakoPods.Core.Tests ──▶ HakoPods.Core
 ```
 
 `Core` never references `App`. `Interop` is never referenced directly by UI code — only

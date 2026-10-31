@@ -16,13 +16,13 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore
-        run: dotnet restore AirPods.sln
+        run: dotnet restore HakoPods.sln
 
       - name: Build
-        run: dotnet build AirPods.sln -c Release --no-restore
+        run: dotnet build HakoPods.sln -c Release --no-restore
 
       - name: Test
-        run: dotnet test AirPods.sln -c Release --no-build
+        run: dotnet test HakoPods.sln -c Release --no-build
 
       - uses: actions/setup-python@v5
         with:

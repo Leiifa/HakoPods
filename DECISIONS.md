@@ -311,3 +311,28 @@ surfaces, shadow-defined edge. This supersedes the "Windows-native, not a macOS 
 above: the popup deliberately imitates the source experience, while window behaviour (no
 focus steal, taskbar-relative placement, DPI handling) stays native. Charging bolts were
 redrawn by the owner's request — the original path self-intersected and spilled over the buds.
+
+---
+
+## ADR-013 — The product is named HakoPods
+
+**Decision.** The app ships as **HakoPods** (箱, "case"), MIT licensed, copyright Leifa.
+Internal identifiers follow: `HakoPods.sln`, `HakoPods.Core`, `HakoPods.App`, exe `HakoPods.exe`,
+settings under `%LOCALAPPDATA%\HakoPods\`.
+
+**Why not "AirPods for Windows".** "AirPods" is Apple's registered trademark. It is fine as
+descriptive prose ("works with AirPods") but cannot be the product name.
+
+**Alternatives considered.** *MimiPods* (owner's first choice, 耳 = ear) was rejected after a
+search turned up a shipping earbud product, **Fazter MimiPods Blush** — a collision in the same
+product category, which is the worst place to have one. *Lidkit* and *Earcase* were free but
+either too niche or too literal. *AkariPods* (灯 = light) was prettier but "Akari" reads as a
+person's given name.
+
+**Trademark position.** The "-Pods" suffix is descriptive and widely used in this space (CAPod,
+QuickBuds, FreeBuddy). We never use Apple's logo, product photography or "AirPods" as our own
+brand, and the README carries an explicit non-affiliation notice.
+
+**Icon.** 箱/耳 as a brand mark only, at 48 px and above. The tray glyph stays the case-and-buds
+silhouette, because a kanji collapses into a smudge at 16 px.
+

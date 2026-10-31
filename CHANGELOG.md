@@ -7,7 +7,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); version
 ## [Unreleased]
 
 ### Added
-- `AirPods.Core.Bluetooth.IBluetoothNative` / `Win32BluetoothNative` /
+- `HakoPods.Core.Bluetooth.IBluetoothNative` / `Win32BluetoothNative` /
   `BluetoothConnectionManager` — connect and disconnect with bounded retry, timeout,
   serialisation and idempotency; native error codes mapped and logged. 7 tests.
 - Measured: enabling an already-enabled service returns `87` in ~2 ms (treated as done);
@@ -15,23 +15,23 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); version
 - `docs/design/POPUP.md` + four SVG renders — popup spec covering all nine states, DPI rules,
   tokens, motion. `docs/design/ICONS.md` + 10 SVG masters and 40 PNGs (5 states × 2 themes ×
   4 sizes), produced by the `atelier` profile, verified by hermes, signed off by the owner.
-- `AirPods.Core.Devices` — paired-device discovery behind a seam, plus a selection service
+- `HakoPods.Core.Devices` — paired-device discovery behind a seam, plus a selection service
   that persists the address (stable across re-pairing). 7 tests.
 - `spike/soak` — harness that runs the real watcher and service side by side with `BleProbe`
   and reports raw vs emitted counts, restarts and memory.
 - `docs/research/SOAK-2026-10-31.md` — 10-minute soak result: 499/499 packets, zero loss.
   APW-103 closed.
-- `AirPods.Core.Settings` — versioned `AppSettings` and an atomic JSON store that recovers
+- `HakoPods.Core.Settings` — versioned `AppSettings` and an atomic JSON store that recovers
   from corruption instead of throwing. 5 tests.
-- `AirPods.Core.Logging` + `Diagnostics` — rolling `FileLogger` (1 MB × 5) and a local
+- `HakoPods.Core.Logging` + `Diagnostics` — rolling `FileLogger` (1 MB × 5) and a local
   diagnostics zip (settings + logs + version). No network. 3 tests.
-- `AirPods.Core.State` — immutable `DeviceState` and a pure reducer with 60 s staleness
+- `HakoPods.Core.State` — immutable `DeviceState` and a pure reducer with 60 s staleness
   (stale measurements are cleared, never frozen). 8 tests.
-- `AirPods.Core.Bluetooth` — `IAdvertisementWatcher` seam, WinRT adapter, and
+- `HakoPods.Core.Bluetooth` — `IAdvertisementWatcher` seam, WinRT adapter, and
   `ProximityPairingService` (dedupe, auto-restart, `IAsyncEnumerable` stream). 9 tests.
-- `AirPods.Core.Advertisements` — proximity-pairing model table, decoded advertisement record
+- `HakoPods.Core.Advertisements` — proximity-pairing model table, decoded advertisement record
   and a pure parser. 12 tests over real captured packets plus synthetic orientation cases.
-- `AirPods.sln` — `AirPods.Core` (net8.0), `AirPods.App` (WPF, PerMonitorV2), `AirPods.Core.Tests`
+- `HakoPods.sln` — `HakoPods.Core` (net8.0), `HakoPods.App` (WPF, PerMonitorV2), `HakoPods.Core.Tests`
   (xUnit), `Directory.Build.props`, and a CI workflow that also runs the task checker.
 - `spike/ble-probe` — disposable .NET 8 console probe: Bluetooth adapter capabilities,
   radio state, and a timed BLE advertisement scan with per-device RSSI/model/hex output.

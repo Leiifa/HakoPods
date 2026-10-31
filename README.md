@@ -1,4 +1,10 @@
-# AirPods for Windows
+# HakoPods
+
+*The AirPods experience, on Windows. 箱 — the case.*
+
+HakoPods is an independent, open-source tray app. It is not affiliated with, endorsed by, or
+sponsored by Apple. "AirPods" is a trademark of Apple Inc. and is used here only to describe
+which devices the app works with.
 
 Bring the *native* AirPods experience to Windows: a popup when you open the case, live
 left / right / case battery, automatic connect, ear-detection auto-pause, and audio that
@@ -68,8 +74,8 @@ Measured on this machine on 2026-10-31 — details in
 The application skeleton (no behaviour yet):
 
 ```
-dotnet build AirPods.sln -c Release
-dotnet test  AirPods.sln -c Release
+dotnet build HakoPods.sln -c Release
+dotnet test  HakoPods.sln -c Release
 ```
 
 The feasibility probes that produced the measurements are separate, disposable projects:
@@ -87,9 +93,9 @@ Planned product layout (task `APW-101`):
 
 ```
 src/
-├─ AirPods.Core/        # domain, BLE parser, Win32 interop, no UI
-├─ AirPods.App/         # WPF tray app + popup
-└─ AirPods.Core.Tests/  # xUnit, parser fixtures
+├─ HakoPods.Core/        # domain, BLE parser, Win32 interop, no UI
+├─ HakoPods.App/         # WPF tray app + popup
+└─ HakoPods.Core.Tests/  # xUnit, parser fixtures
 ```
 
 ## Documentation map
