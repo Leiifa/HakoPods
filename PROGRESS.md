@@ -7,7 +7,7 @@
 **Last updated:** 2026-10-31 15:05 (UTC+7) · **By:** Hermes
 **Phase:** M2 at 11 of 16 — tray, popup and lid trigger shipped and confirmed; settings and diagnostics remain
 **Current milestone:** M2
-**Current task:** none — next M2 work is the settings surface (APW-111) and diagnostics (APW-112)
+**Current task:** APW-113 — single instance done and verified; autostart wired but needs a settings toggle
 
 ---
 
@@ -15,7 +15,7 @@
 
 | | |
 |---|---|
-| Tasks done | 27 of 56 |
+| Tasks done | 28 of 56 |
 | In review | 0 |
 | Blocked | 0 |
 | Product code | parser, watcher, reducer, settings, logging, selection, connection, tray — 65 tests green |
