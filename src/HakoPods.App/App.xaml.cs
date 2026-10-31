@@ -21,6 +21,7 @@ public partial class App : System.Windows.Application
     private JsonSettingsStore? _store;
     private DispatcherTimer? _connectionWatch;
     private bool _wasConnected;
+    private bool _routedSinceConnect;
     private string? _previousEndpoint;
     private TrayIconHost? _tray;
     private PopupWindow? _popup;
@@ -91,6 +92,7 @@ public partial class App : System.Windows.Application
         {
             _tray.ApplyState(state);
             OnStateChanged(state);
+            RouteOnWear(state);
         };
         _feed.Start();
 
@@ -225,11 +227,14 @@ public partial class App : System.Windows.Application
 
         if (connected)
         {
+            // Only remember where audio was; routing waits until a bud is actually worn. Windows
+            // links the pair as soon as the lid opens, buds in the case included, and switching
+            // output then steals audio for nobody.
             RememberCurrentOutput();
-            RouteAudioIfConfigured();
         }
         else
         {
+            _routedSinceConnect = false;
             RestorePreviousOutput();
         }
     }
@@ -277,6 +282,21 @@ public partial class App : System.Windows.Application
         {
             router.TrySetDefault(previous);
         }
+    }
+
+    /// <summary>
+    /// Switches playback the first time a bud is worn after connecting. `AnyInEar` comes from the
+    /// advertisement, so a pair sitting in an open case never triggers it.
+    /// </summary>
+    private void RouteOnWear(HakoPods.Core.State.DeviceState state)
+    {
+        if (_routedSinceConnect || !state.AnyInEar || !IsConnected())
+        {
+            return;
+        }
+
+        _routedSinceConnect = true;
+        RouteAudioIfConfigured();
     }
 
     private void RouteAudioIfConfigured()
