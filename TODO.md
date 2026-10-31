@@ -173,6 +173,7 @@ hardware, and kill the project early if the driver-free path does not hold up.
   - AC: opt-in; on lid-open + near, connects within 10 s, 10/10 attempts; respects a manual disconnect for 60 s; never more than one attempt per 10 s.
 
 - [x] APW-202 | P0 | done | M3 | deps: APW-104 | Ear-detection auto-pause and resume
+  - Owner bug (2026-10-31): with one bud worn, the card claimed both were in ear — one advertisement was enough to change the display while three advertisers disagree. Ear changes are now held until a second sample confirms them.
   - Owner bug (2026-10-31): inserting a bud paused music that was already playing — the key toggle fired on both edges. Insertion now resumes only when the app paused it (`_pausedByEar`), and the flag clears on disconnect.
   - AC: removing a bud pauses within 2 s; reinserting resumes only media we paused; a manual pause is never overridden; works with Spotify, YouTube and a browser player.
 
