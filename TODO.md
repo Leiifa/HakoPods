@@ -148,7 +148,7 @@ hardware, and kill the project early if the driver-free path does not hold up.
 - [ ] APW-113 | P2 | todo | M2 | deps: APW-101 | Single instance and autostart
   - AC: a second launch surfaces the existing instance and exits; autostart toggle writes/removes the HKCU Run value; verified after a reboot.
 
-- [ ] APW-216 | P0 | doing | M3 | deps: APW-103 | owner: hermes | Per-advertiser state, verified charging and ear bits
+- [x] APW-216 | P0 | done | M3 | deps: APW-103 | Per-advertiser state, verified charging and ear bits
   - **Charging decoded 2026-10-31.** With the lid open and only the charger changing, the flags byte differs by exactly `0x40` (`0x9a → 0xda`, `0xaa → 0xea`). Bit 6 is case charging, and it lives *inside* the case-battery nibble — which is why three independent low-bit flags produced "everything charging" from `0x8f`. Parser now reads bit 6, masks it out of the level, and never claims bud charging. 66 tests green, including a pair captured on and off power.
   - Still open: choosing *which* advertiser describes the buds in use (three addresses, last-one-wins), which is what produced the wrong ear.
   - Finding so far: two labelled captures prove the charging byte is identical before and after the case goes on power, and the case's advertiser disappears while charging. Charging is therefore not in `payload[7]`'s low bits, and the mark stays off. Next capture must have the case **open and on power** so its advertiser is present.

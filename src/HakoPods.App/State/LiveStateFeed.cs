@@ -24,7 +24,7 @@ public sealed class LiveStateFeed : IAsyncDisposable
     private DeviceState _state = DeviceState.Empty;
     private DateTimeOffset _lastSampleAt = DateTimeOffset.MinValue;
     private int _restartsSinceSample;
-    private (bool Left, bool Right)? _pendingEar;
+    private readonly AdvertiserTable _advertisers = new();
     private bool _disposed;
 
     public LiveStateFeed(ulong? address, Dispatcher dispatcher, int nearThresholdDbm = -72)
@@ -168,8 +168,18 @@ public sealed class LiveStateFeed : IAsyncDisposable
                         return;
                     }
 
-                    var next = DeviceStateReducer.Apply(_state, sample);
-                    Publish(ConfirmEar(next));
+                    // Each advertiser keeps its own story; the display takes one coherent one.
+                    var previousForAddress = _advertisers.Entries.TryGetValue(sample.Address, out var entry)
+                        ? entry.State
+                        : DeviceState.Empty;
+
+                    var next = DeviceStateReducer.Apply(previousForAddress, sample);
+                    _advertisers.Observe(sample.Address, next, sample.Rssi, sample.ReceivedAt);
+
+                    if (_advertisers.Best(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(30)) is { } best)
+                    {
+                        Publish(best);
+                    }
                 });
             }
         }
@@ -177,32 +187,6 @@ public sealed class LiveStateFeed : IAsyncDisposable
         {
             // Shutdown.
         }
-    }
-
-    /// <summary>
-    /// Ear changes must be confirmed by a second advertisement before they are shown. The pair
-    /// has three advertisers and a cached or lagging one can report a bud in an ear that is
-    /// empty — which is how the card ended up claiming both buds were worn.
-    /// </summary>
-    private DeviceState ConfirmEar(DeviceState next)
-    {
-        var previous = (_state.LeftInEar, _state.RightInEar);
-        var proposed = (next.LeftInEar, next.RightInEar);
-
-        if (proposed == previous)
-        {
-            _pendingEar = null;
-            return next;
-        }
-
-        if (_pendingEar != proposed)
-        {
-            _pendingEar = proposed;
-            return next with { LeftInEar = previous.Item1, RightInEar = previous.Item2 };
-        }
-
-        _pendingEar = null;
-        return next;
     }
 
     private void Publish(DeviceState next)
