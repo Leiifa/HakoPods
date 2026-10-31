@@ -78,6 +78,8 @@ public partial class App : System.Windows.Application
             // A locked-down policy key must not stop the app from running.
         }
 
+        HakoPods.App.Notifications.ToastNotifier.EnsureRegistered("HakoPods");
+
         _native = new Win32BluetoothNative();
         _connection = new BluetoothConnectionManager(_native, logger);
 
@@ -116,6 +118,12 @@ public partial class App : System.Windows.Application
 
         // Development aid: `HakoPods.exe --demo-popup` renders the card once so the layout can be
         // inspected (and screenshotted) without waiting for a lid event.
+        if (e.Args.Contains("--test-toast", StringComparer.OrdinalIgnoreCase))
+        {
+            HakoPods.App.Notifications.ToastNotifier.Show("AirPods Pro",
+                "Left 80 %", "Right 90 %", "Case 60 %");
+        }
+
         if (e.Args.Contains("--settings", StringComparer.OrdinalIgnoreCase))
         {
             OpenSettings();
@@ -220,6 +228,10 @@ public partial class App : System.Windows.Application
         }
 
         _lastPopupAt = DateTimeOffset.UtcNow;
+
+        // Toast is parked: Windows only shows toasts for unpackaged exes that own a Start-menu
+        // shortcut carrying the AppUserModelID, so Show() succeeds and nothing appears. Until that
+        // shortcut exists (APW-305 packaging), the card is the surface that actually works.
         ShowPopup(state);
 
         AutoConnectIfNeeded();
@@ -650,6 +662,38 @@ public partial class App : System.Windows.Application
         {
             _settings = saved;
         }
+    }
+
+    /// <summary>
+    /// The lid-open surface: a plain toast with the three facts worth interrupting for. The card
+    /// stays behind the tray icon, where someone is deliberately looking for detail.
+    /// </summary>
+    private static bool ShowToast(HakoPods.Core.State.DeviceState state)
+    {
+        var lines = new List<string>(3);
+
+        if (state.LeftBatteryPercent is { } left)
+        {
+            lines.Add($"Left {left} %");
+        }
+
+        if (state.RightBatteryPercent is { } right)
+        {
+            lines.Add($"Right {right} %");
+        }
+
+        if (state.CaseBatteryPercent is { } casePercent)
+        {
+            lines.Add($"Case {casePercent} %");
+        }
+
+        if (lines.Count == 0)
+        {
+            lines.Add("Battery not reported yet");
+        }
+
+        var title = string.IsNullOrWhiteSpace(state.ModelName) ? "AirPods" : state.ModelName;
+        return HakoPods.App.Notifications.ToastNotifier.Show(title, lines.ToArray());
     }
 
     private void ShowPopup(HakoPods.Core.State.DeviceState state)
