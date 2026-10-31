@@ -23,6 +23,10 @@ public partial class App : System.Windows.Application
     private bool _wasConnected;
     private bool _routedSinceConnect;
     private bool? _anyInEar;
+
+    // Advertisements are the only sign of life the buds give us. Silence while the link is up
+    // means they are in the case: closing the lid produces no packet at all, because they sleep.
+    private DateTimeOffset _lastSampleAt = DateTimeOffset.MinValue;
     private bool _pausedByEar;
     private DateTimeOffset? _earCandidateAt;
     private bool _revertedUnworn;
@@ -108,6 +112,7 @@ public partial class App : System.Windows.Application
         _feed = new LiveStateFeed(address: null, Dispatcher, settings.NearThresholdDbm);
         _feed.StateChanged += (_, state) =>
         {
+            _lastSampleAt = DateTimeOffset.UtcNow;
             _tray.ApplyState(state);
             OnStateChanged(state);
             PauseOnEarChange(state);
@@ -538,6 +543,13 @@ public partial class App : System.Windows.Application
         }
         else
         {
+            if (DateTimeOffset.UtcNow - _lastSampleAt > TimeSpan.FromSeconds(45) && _anyInEar != true)
+            {
+                // Connected, no advertisement for 45 s, nothing in an ear: the buds are in the case
+                // with the lid shut. Windows keeps the link up regardless; drop it like macOS does.
+                _ = Task.Run(() => _connection?.DisconnectAsync(_address!.Value));
+            }
+
             _routedSinceConnect = false;
             _earCandidateAt = null;
             _revertedUnworn = false;
