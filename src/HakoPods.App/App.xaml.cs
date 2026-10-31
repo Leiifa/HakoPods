@@ -434,11 +434,6 @@ public partial class App : System.Windows.Application
                     {
                     await _connection.EnableHandsFreeAsync(address).ConfigureAwait(false);
 
-                    // Publishing the headset endpoint makes Windows republish the endpoints and
-                    // move the default onto the one that carries no music. Retry until the stereo
-                    // endpoint exists again: it is absent for a moment during the flip, and one
-                    // check silently missed it, leaving playback pointed at nothing.
-                    await RestoreStereoEndpointAsync().ConfigureAwait(false);
 
                     }
                     catch (Exception)
@@ -475,10 +470,6 @@ public partial class App : System.Windows.Application
             {
             await _connection.DisableHandsFreeAsync(address).ConfigureAwait(false);
 
-            // Lowering hands-free does not bring the stereo endpoint back on this adapter; only a
-            // service cycle republishes it. Without this the call ends and nothing plays.
-            await _connection.CycleA2dpAsync(address).ConfigureAwait(false);
-            await RestoreStereoEndpointAsync().ConfigureAwait(false);
             }
             catch (Exception)
             {
@@ -490,12 +481,7 @@ public partial class App : System.Windows.Application
     private void PollConnection()
     {
         _feed?.EnsureAlive();
-        // Mic-on-demand is OFF. Measured across three call cycles on this adapter: raising the
-        // hands-free profile tears A2DP down, and lowering it never republishes the stereo
-        // endpoint (the service reports already-enabled while the endpoint is gone). The result
-        // was a call with a working mic and silence afterwards. Reliability beats the feature:
-        // stereo is kept, and the AirPods microphone is simply unavailable, as before.
-        // ApplyMicOnDemand();
+        ApplyMicOnDemand();
 
         if (!_routedSinceConnect && _feed?.Current is { } current && current.AnyInEar && IsConnected())
         {
