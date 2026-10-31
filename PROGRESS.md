@@ -7,7 +7,7 @@
 **Last updated:** 2026-10-31 15:05 (UTC+7) · **By:** Hermes
 **Phase:** M2 at 11 of 16 — tray, popup and lid trigger shipped and confirmed; settings and diagnostics remain
 **Current milestone:** M2
-**Current task:** APW-201 (auto-connect) and APW-113 (autostart) still need a physical check; APW-205 is next
+**Current task:** none — APW-202 (ear auto-pause) is next
 
 ---
 
@@ -15,7 +15,7 @@
 
 | | |
 |---|---|
-| Tasks done | 30 of 55 |
+| Tasks done | 31 of 55 |
 | In review | 0 |
 | Blocked | 0 |
 | Product code | parser, watcher, reducer, settings, logging, selection, connection, tray — 65 tests green |

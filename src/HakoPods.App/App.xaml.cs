@@ -59,6 +59,7 @@ public partial class App : System.Windows.Application
         }
 
         _settings = settings;
+        _previousEndpoint = settings.PreviousAudioEndpointId;
         _address = ParseAddress(settings.PreferredDeviceAddress);
         try
         {
@@ -244,9 +245,23 @@ public partial class App : System.Windows.Application
         var current = router.GetDefaultEndpointId();
         var airPods = FindAirPodsEndpoint(router);
 
-        if (current is not null && current != airPods)
+        if (current is null || current == airPods || current == _previousEndpoint)
         {
-            _previousEndpoint = current;
+            return;
+        }
+
+        _previousEndpoint = current;
+
+        // Persist it: the app may be restarted between connect and disconnect, and restoring to
+        // nothing is worse than restoring to where the user was.
+        _settings = _settings with { PreviousAudioEndpointId = current };
+        try
+        {
+            _store?.Save(_settings);
+        }
+        catch (Exception)
+        {
+            // Losing the memory is acceptable; crashing the tray is not.
         }
     }
 

@@ -177,7 +177,7 @@ hardware, and kill the project early if the driver-free path does not hold up.
 - [ ] APW-204 | P1 | todo | M3 | deps: APW-016 | Microphone policy ("stereo always")
   - AC: toggle disables HFP so no app can force call quality; verified with Teams and a browser mic test; UI warns that the AirPods mic becomes unavailable; revert restores HFP.
 
-- [ ] APW-205 | P1 | doing | M3 | deps: APW-203 | owner: hermes | Restore the previous endpoint on disconnect
+- [x] APW-205 | P1 | done | M3 | deps: APW-203 | Restore the previous endpoint on disconnect
   - AC: after both buds are cased and the device disconnects, the stored endpoint is restored within 2 s; a 2 s debounce prevents flip-flop on immediate reconnect.
 
 - [ ] APW-206 | P2 | todo | M3 | deps: APW-109 | Fullscreen and presentation suppression

@@ -23,6 +23,9 @@ public sealed record AppSettings
     /// <summary>Endpoint id learned when the user picked the AirPods as output.</summary>
     public string? PreferredAudioEndpointId { get; init; }
 
+    /// <summary>Where audio was playing before the AirPods arrived; restored on disconnect.</summary>
+    public string? PreviousAudioEndpointId { get; init; }
+
     public bool DisableHandsFreeProfile { get; init; }
 
 
