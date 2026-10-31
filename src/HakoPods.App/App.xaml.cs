@@ -620,7 +620,12 @@ public partial class App : System.Windows.Application
 
             // Link is down, but the buds may still advertise from inside a closed case. Battery
             // from a disconnected pair must not be presented as live state: show "not connected".
-            if (!_trayShowsDisconnected)
+            // The audio endpoint is the honest signal: fConnected reports true while Windows itself
+        // says "not connected" (measured repeatedly on this pair), so a link rule built on it
+        // never fires.
+        var hasAudioEndpoint = FindAirPodsEndpoint(new HakoPods.Core.Audio.AudioEndpointRouter()) is not null;
+
+        if (!hasAudioEndpoint && !_trayShowsDisconnected)
             {
                 _trayShowsDisconnected = true;
                 ApplyDisconnectedTrayState();
