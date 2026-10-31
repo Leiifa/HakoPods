@@ -237,7 +237,15 @@ public partial class App : System.Windows.Application
     private void OnStateChanged(HakoPods.Core.State.DeviceState state)
     {
         var openedNow = state.LidOpen && !_lidWasOpen;
+        var closedNow = !state.LidOpen && _lidWasOpen;
         _lidWasOpen = state.LidOpen;
+
+        if (closedNow)
+        {
+            // Windows leaves the pair linked after the lid shuts, unlike macOS. Drop it so audio
+            // returns to the previous output and the buds sleep.
+            DisconnectOnLidClose();
+        }
 
         if (!openedNow || !state.IsPresent)
         {
@@ -429,6 +437,39 @@ public partial class App : System.Windows.Application
             // and the stream with it. This belongs only here — on the connect path it would tear
             // down the endpoint the user is listening on.
             await _connection.CycleA2dpAsync(address).ConfigureAwait(false);
+        });
+    }
+
+    /// <summary>
+    /// Disconnects a few seconds after the lid shuts, then hands audio back. The delay covers the
+    /// flap while the buds settle into the case — disconnecting immediately interrupted a lid
+    /// that was closed and reopened straight away.
+    /// </summary>
+    private void DisconnectOnLidClose()
+    {
+        if (_settings.AutoConnectOnLidOpen is false || _address is not { } address || _connection is null)
+        {
+            return;
+        }
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(3)).ConfigureAwait(false);
+
+                if (_lidWasOpen || !IsConnected())
+                {
+                    return; // reopened, or already gone
+                }
+
+                RestorePreviousOutput();
+                await _connection.DisconnectAsync(address).ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+                // The pair may already be asleep; nothing to undo.
+            }
         });
     }
 
