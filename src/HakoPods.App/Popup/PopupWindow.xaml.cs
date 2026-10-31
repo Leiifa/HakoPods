@@ -81,11 +81,13 @@ public partial class PopupWindow : Window
             StandardLayout.Visibility = Visibility.Visible;
             MaxLayout.Visibility = Visibility.Collapsed;
 
+            var fresh = IsFresh(state);
+
             ApplyColumn(LeftLabel, LeftEar, LeftValue, LeftPercent, LeftBolt, LeftTrack, LeftFill, LeftDash, LeftLow,
-                "Left", state.LeftBatteryPercent, state.LeftCharging, state.LeftInEar, 92);
+                "Left", state.LeftBatteryPercent, state.LeftCharging, fresh && state.LeftInEar, 92);
 
             ApplyColumn(RightLabel, RightEar, RightValue, RightPercent, RightBolt, RightTrack, RightFill, RightDash, RightLow,
-                "Right", state.RightBatteryPercent, state.RightCharging, state.RightInEar, 92);
+                "Right", state.RightBatteryPercent, state.RightCharging, fresh && state.RightInEar, 92);
 
             ApplyColumn(CaseLabel, null, CaseValue, CasePercent, CaseBolt, CaseTrack, CaseFill, CaseDash, CaseLow,
                 "Case", state.CaseBatteryPercent, state.CaseCharging, inEar: false, railWidth: 92);
@@ -273,11 +275,21 @@ public partial class PopupWindow : Window
         tbPercent.Visibility = Visibility.Collapsed;
     }
 
+    /// <summary>
+    /// Ear state is only claimed while the reading is fresh. Measured 2026-10-31: with one bud in
+    /// and the lid closed the pair advertises roughly once per 15 s, and Windows replays buffered
+    /// packets, so a "Left in ear" can be a minute old. A stale ear is worse than no ear.
+    /// </summary>
+    private static bool IsFresh(DeviceState state) =>
+        state.IsPresent
+        && state.LastSeenAt is { } seen
+        && DateTimeOffset.UtcNow - seen < TimeSpan.FromSeconds(10);
+
     private static string BuildFooter(DeviceState state)
     {
-        if (!state.IsPresent)
+        if (!IsFresh(state))
         {
-            return "Last reading";
+            return state.IsPresent ? "Last reading" : "Not nearby";
         }
 
         if (state.LeftInEar && state.RightInEar)
