@@ -148,6 +148,9 @@ hardware, and kill the project early if the driver-free path does not hold up.
 - [ ] APW-113 | P2 | doing | M2 | deps: APW-101 | owner: hermes | Single instance and autostart
   - AC: a second launch surfaces the existing instance and exits; autostart toggle writes/removes the HKCU Run value; verified after a reboot.
 
+- [ ] APW-216 | P0 | todo | M3 | deps: APW-103 | owner: hermes | Per-advertiser state, verified charging and ear bits
+  - AC: a labelled capture (idle, charging, one bud in, both in) identifies which byte carries the charging bits and which advertiser describes the buds in use; the card never claims a component is charging or in an ear that the current ground truth contradicts.
+
 - [ ] APW-114 | P0 | todo | M2 | deps: APW-102, APW-104 | Test suite for parser and state machine
   - AC: ≥ 40 tests covering every model ID in RESEARCH.md §5, orientation flip, `0xF` unknown battery and charging bits; runs in CI in under 60 s.
 

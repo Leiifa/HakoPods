@@ -22,6 +22,9 @@ namespace HakoPods.App.Popup;
 /// </summary>
 public partial class PopupWindow : Window
 {
+    /// <summary>Set true only when a labelled capture has confirmed the charging bits.</summary>
+    private const bool ChargingMarksVerified = false;
+
     private const double ShowMs = 160;
     private const double DismissMs = 120;
     private static readonly TimeSpan VisibleFor = TimeSpan.FromSeconds(6);
@@ -249,9 +252,11 @@ public partial class PopupWindow : Window
         tbValue.Foreground = _primary;
         tbPercent.Visibility = Visibility.Visible;
 
-        // The bolt was dropped in a rewrite and no charging state ever showed one: the case
-        // read 60 % while charging and looked identical to 60 % idle.
-        if (bolt is not null)
+        // Charging marks are OFF until the bit layout is verified. Measured 2026-10-31: the owner
+        // wore one bud with the case idle, and the card claimed two components were charging. A
+        // missing bolt is a gap; a wrong one is a lie, and the same principle already governs the
+        // stale ear. Flip this once a labelled capture settles which byte carries what.
+        if (bolt is not null && ChargingMarksVerified)
         {
             bolt.Visibility = charging ? Visibility.Visible : Visibility.Collapsed;
         }
