@@ -7,7 +7,7 @@
 **Last updated:** 2026-10-31 15:05 (UTC+7) · **By:** Hermes
 **Phase:** M2 at 11 of 16 — tray, popup and lid trigger shipped and confirmed; settings and diagnostics remain
 **Current milestone:** M2
-**Current task:** APW-216 (charging done, advertiser selection open); APW-201, APW-202, APW-204, APW-207 and APW-113 all parked by the owner
+**Current task:** APW-207 is the only task waiting on hardware (one suspend/resume, one radio toggle)
 
 ---
 
