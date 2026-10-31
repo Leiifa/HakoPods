@@ -1,0 +1,27 @@
+# Build output
+bin/
+obj/
+out/
+publish/
+*.user
+*.suo
+.vs/
+
+# Local tooling
+.idea/
+.vscode/
+*.DotSettings.user
+
+# Disposable feasibility spike (findings go to docs/research/)
+spike/
+
+# Agent instructions are local to this project and must not be committed (see AGENTS.md §9)
+AGENTS.md
+CLAUDE.md
+.cursorrules
+.github/copilot-instructions.md
+
+# OS noise
+Thumbs.db
+desktop.ini
+.DS_Store

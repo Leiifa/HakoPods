@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>APW-115 — three Apple-dialect variations</title>
+<meta name="color-scheme" content="light">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box}
+  :root{
+    --paper:#f5f5f7; --ink:#1d1d1f; --ink2:#6e6e73; --ink3:#6e6e73;
+    --line:#d2d2d7; --line-soft:#e4e4e9;
+    --blue:#0071e3;
+    --font:'Inter','SF Pro Text',-apple-system,'Segoe UI Variable Text',system-ui,sans-serif;
+  }
+  html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:clip}
+  body{margin:0;overflow-x:clip;background:var(--paper);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.5}
+  .wrap{max-width:1180px;margin:0 auto;padding:64px 32px 96px}
+
+  .sheet-head{max-width:760px;margin-bottom:64px}
+  .eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:16px}
+  h1{font-size:44px;line-height:1.08;letter-spacing:-.025em;font-weight:600;margin:0 0 20px;text-wrap:balance}
+  .lede{font-size:17px;line-height:1.55;color:#3a3a3c;margin:0 0 24px;letter-spacing:-.005em;max-width:62ch}
+  .meta{font-size:12px;line-height:1.6;color:var(--ink3);border-top:1px solid var(--line);padding-top:14px;max-width:70ch}
+
+  .variant{padding-top:56px;margin-top:56px;border-top:1px solid var(--line)}
+  .vhead{display:grid;grid-template-columns:64px 1fr;gap:8px;margin-bottom:28px;align-items:start}
+  .vnum{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink3);padding-top:7px}
+  h2{font-size:26px;line-height:1.2;letter-spacing:-.02em;font-weight:600;margin:0 0 10px}
+  .vtag{font-size:12px;font-weight:500;letter-spacing:.02em;color:var(--ink3);white-space:nowrap}
+  .vtext p{margin:0;font-size:15px;line-height:1.55;color:#48484a;max-width:66ch}
+
+  .band{margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);padding:46px 0 40px}
+  .band-in{max-width:1180px;margin:0 auto;padding:0 32px;display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));gap:40px;justify-items:center}
+  .shot{margin:0;display:flex;flex-direction:column;align-items:center;gap:18px;width:100%;max-width:400px}
+  .shot figcaption{display:flex;flex-direction:column;gap:3px;font-size:12px;line-height:1.45;
+                    width:100%;max-width:336px}
+  .shot figcaption b{font-weight:600;letter-spacing:-.005em}
+  .band-light{background:#ececed}
+  .band-light figcaption b{color:#1d1d1f}
+  .band-light figcaption span{color:#5c5c60}
+  .band-dark{background:#0f0f11}
+  .band-dark figcaption b{color:#f5f5f7}
+  .band-dark figcaption span{color:#a1a1a6}
+  /* the popover variant needs a desktop stand-in behind the material;
+     two linear washes, not a halo */
+  .band.dv1.band-light{background:linear-gradient(118deg,#f7e9cf 0%,#e6e1db 32%,#d6dce7 66%,#c2cad8 100%)}
+  .band.dv1.band-dark{background:linear-gradient(118deg,#5a4034 0%,#31343a 36%,#252b36 70%,#15171b 100%)}
+  .band.dv2.band-light{background:#f0f0f3}
+  .band.dv2.band-dark{background:#000000}
+  .band.dv3.band-light{background:#e7e7ea}
+  .band.dv3.band-dark{background:#101012}
+
+  .vnotes{list-style:none;padding:0;margin:24px 0 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+  .vnotes li{border-top:1px solid var(--line);padding-top:12px;font-size:13px;line-height:1.5;color:#48484a;display:flex;flex-direction:column;gap:5px}
+  .vnotes b{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+
+  /* ============ shared popup frame ============ */
+  .pop{width:336px;height:206px;flex:0 0 auto;display:flex;flex-direction:column;overflow:hidden;
+        font-family:var(--font);font-variant-numeric:tabular-nums;position:relative}
+  .pop .dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex:0 0 auto;
+              background:currentColor;opacity:.32}
+  .pop .dot.is-on{opacity:1;background:var(--accent)}
+  .pop .glyph{width:21px;height:21px;flex:0 0 auto}
+  .pop .bolt{width:7px;height:11px;flex:0 0 auto;margin-left:3px;color:var(--accent);align-self:flex-start;margin-top:4px}
+  .pop .ear{width:9px;height:9px;margin-left:4px;opacity:.75;vertical-align:baseline}
+  .pop .lowline{font-size:12px;font-weight:600;letter-spacing:.01em;color:var(--warn);margin-top:6px}
+  .pop .is-unknown{color:var(--text2)}
+
+  /* ---------- v1 popover ---------- */
+  .v1{border-radius:12px;padding:12px 16px;color:var(--text);background:var(--surface);
+        border:1px solid var(--edge);
+        box-shadow:0 22px 44px -16px rgba(0,0,0,.38),0 3px 10px -2px rgba(0,0,0,.14),
+                   inset 0 1px 0 var(--bevel)}
+  .v1.t-light{--surface:rgba(250,250,252,.72);--text:#1d1d1f;--text2:rgba(60,60,67,.82);
+      --sep:rgba(60,60,67,.16);--track:rgba(120,120,128,.18);--fill:#48484a;
+      --accent:#0071e3;--warn:#d70015;--edge:rgba(0,0,0,.06);--bevel:rgba(255,255,255,.75);
+      -webkit-backdrop-filter:blur(26px) saturate(180%);backdrop-filter:blur(26px) saturate(180%)}
+  .v1.t-dark{--surface:rgba(44,46,50,.66);--text:#f5f5f7;--text2:rgba(235,235,245,.66);
+      --sep:rgba(235,235,245,.14);--track:rgba(235,235,245,.16);--fill:#d1d1d6;
+      --accent:#0a84ff;--warn:#ff8a82;--edge:rgba(255,255,255,.09);--bevel:rgba(255,255,255,.14);
+      -webkit-backdrop-filter:blur(26px) saturate(180%);backdrop-filter:blur(26px) saturate(180%)}
+  .p1__head{display:flex;align-items:center;gap:8px;height:24px}
+  .p1__model{font-size:13px;font-weight:600;letter-spacing:-.01em}
+  .p1__status{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);letter-spacing:-.005em}
+  .p1__rule{height:1px;background:var(--sep);margin:8px -16px 0}
+  .p1__cols{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:auto 0;padding-top:8px}
+  .p1__cols.is-single{grid-template-columns:1fr}
+  .p1__labels{display:flex;align-items:center;gap:4px;min-height:13px}
+  .p1__label{font-size:12px;line-height:1.2;color:var(--text2);letter-spacing:-.005em}
+  .p1__value{white-space:nowrap;font-size:26px;line-height:1.05;font-weight:600;letter-spacing:-.035em;margin-top:6px;display:flex;align-items:baseline}
+  .p1__pct{font-size:16px;font-weight:400;color:var(--text2);margin-left:1px;letter-spacing:0}
+  .p1__rail{height:3px;border-radius:2px;background:var(--track);margin-top:8px;overflow:hidden}
+  .p1__rail i{display:block;height:100%;background:var(--fill);border-radius:2px}
+  .p1__rail.is-unknown{background:var(--track);opacity:.45}
+  .p1__foot{margin-top:auto;font-size:12px;line-height:1.3;color:var(--text2);letter-spacing:-.005em}
+  .v1 .is-single .p1__label,.v1 .is-single .p1__value{justify-content:center;text-align:center}
+  .v1 .is-single .p1__value{font-size:34px}
+  .v1 .is-single .p1__rail{width:180px;margin-left:auto;margin-right:auto;margin-top:12px}
+
+  /* ---------- v2 widget ---------- */
+  .v2{border-radius:22px;padding:16px 18px;color:var(--text);background:var(--surface);
+        box-shadow:0 1px 1px rgba(0,0,0,.05),0 10px 28px -14px rgba(0,0,0,.28)}
+  .v2.t-light{--surface:#ffffff;--text:#1d1d1f;--text2:#6e6e73;--track:#f0f0f2;--fill:#248a3d;--accent:#0071e3;--warn:#d70015}
+  .v2.t-dark{--surface:#1c1c1e;--text:#f5f5f7;--text2:#a1a1a6;--track:#2c2c2e;--fill:#30d158;--accent:#0a84ff;--warn:#ff453a}
+  .p2__head{display:flex;align-items:baseline;gap:8px}
+  .p2__model{font-size:15px;font-weight:600;letter-spacing:-.02em}
+  .p2__status{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)}
+  .p2__cols{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:auto 0;padding-top:12px}
+  .p2__cols.is-single{grid-template-columns:1fr}
+  .p2__labels{display:flex;align-items:center;gap:4px}
+  .p2__label{font-size:12px;color:var(--text2);letter-spacing:.005em}
+  .p2__value{white-space:nowrap;font-size:32px;line-height:1;font-weight:600;letter-spacing:-.04em;margin-top:8px;display:flex;align-items:baseline}
+  .p2__pct{font-size:17px;font-weight:400;color:var(--text2);margin-left:1px;letter-spacing:-.01em}
+  .p2__rail{height:6px;border-radius:3px;background:var(--track);margin-top:12px;overflow:hidden}
+  .p2__rail i{display:block;height:100%;background:var(--fill);border-radius:3px}
+  .p2__rail i.is-low{background:var(--warn)}
+  .p2__rail.is-unknown{background:transparent;border:1px dashed var(--track);height:6px}
+  .p2__foot{margin-top:auto;font-size:12px;color:var(--text2);letter-spacing:-.005em}
+  .v2 .is-single .p2__value{font-size:44px;justify-content:center}
+  .v2 .is-single .p2__label{text-align:center;justify-content:center;display:flex}
+  .v2 .is-single .p2__rail{width:190px;margin-left:auto;margin-right:auto;margin-top:16px}
+
+  /* ---------- v3 studio ---------- */
+  .v3{border-radius:8px;padding:12px 14px;color:var(--text);background:var(--surface);border:1px solid var(--edge)}
+  .v3.t-light{--surface:#f2f2f4;--text:#1c1c1e;--text2:#6c6c70;--edge:#d8d8dc;--tick:#3a3a3c;
+      --tick-empty:#dcdce0;--accent:#0071e3;--warn:#c1121f;--hair:rgba(0,0,0,.09)}
+  .v3.t-dark{--surface:#1c1c1e;--text:#f2f2f7;--text2:#98989d;--edge:#333336;--tick:#e5e5ea;
+      --tick-empty:rgba(235,235,245,.16);--accent:#0a84ff;--warn:#ff453a;--hair:rgba(255,255,255,.09)}
+  .p3__head{display:flex;align-items:center;gap:8px;height:22px}
+  .p3__model{font-size:12px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--text2)}
+  .p3__status{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)}
+  .p3__rule{height:1px;background:var(--hair);margin:8px -14px 0}
+  .p3__grid{display:grid;grid-template-columns:repeat(3,1fr);margin:auto 0;padding-top:12px}
+  .p3__grid.is-single{grid-template-columns:1fr}
+  .p3__cell{padding-right:10px}
+  .p3__cell.is-ruled{border-left:1px solid var(--hair);padding-left:11px}
+  .p3__labels{display:flex;align-items:center;gap:4px;min-height:13px}
+  .p3__label{font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text2)}
+  .p3__value{white-space:nowrap;font-family:'SF Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;font-size:21px;line-height:1;
+      font-weight:500;letter-spacing:-.02em;margin-top:8px;display:flex;align-items:baseline}
+  .p3__pct{font-size:14px;margin-left:3px;font-family:var(--font);font-weight:500;color:var(--text2);margin-left:1px}
+  .p3__ticks{display:flex;gap:3px;margin-top:12px}
+  .p3__ticks i{flex:1;height:8px;border-radius:1.5px;background:var(--tick-empty)}
+  .p3__ticks i.is-on{background:var(--tick)}
+  .p3__foot{margin-top:auto;font-size:12px;color:var(--text2);border-top:1px solid var(--hair);
+      margin-left:-14px;margin-right:-14px;padding:8px 14px 0}
+  .v3 .is-single .p3__value{font-size:30px}
+  .v3 .is-single .p3__label,.v3 .is-single .p3__ticks{max-width:200px}
+  .v3 .is-single .p3__cell{padding-right:0;max-width:200px;margin:2px auto 0}
+  .v3 .is-single .p3__ticks{margin-top:12px}
+  .v3 .is-single .p3__foot{text-align:center}
+
+  /* ---------- comparison ---------- */
+  .cmp{margin-top:72px;padding-top:40px;border-top:1px solid var(--line)}
+  table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;vertical-align:top;padding:12px 14px 12px 0;border-bottom:1px solid var(--line-soft)}
+  thead th{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);font-weight:600;
+      border-bottom:1px solid var(--line)}
+  tbody th{font-weight:500;color:#48484a;width:25%}
+  td b{font-weight:600}
+  .tablenote{margin:16px 0 0;font-size:12.5px;line-height:1.55;color:#6e6e73;max-width:78ch}
+  .tablenote code{font-family:'SF Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;font-size:12px;color:#48484a}
+  .pick{margin-top:40px;padding:24px 26px;border-radius:14px;background:#fff;border:1px solid var(--line-soft);max-width:72ch}
+  .pick h3{margin:0 0 8px;font-size:15px;font-weight:600;letter-spacing:-.01em}
+  .pick p{margin:0;font-size:14px;line-height:1.55;color:#48484a}
+  footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);font-size:12px;line-height:1.6;color:var(--ink3);max-width:78ch}
+
+  @media (max-width:900px){
+    .wrap{padding:40px 20px 64px}
+    h1{font-size:32px}
+    .band-in{grid-template-columns:1fr;gap:32px;padding:0 20px}
+    .vnotes{grid-template-columns:1fr;gap:16px}
+    .vhead{grid-template-columns:1fr;gap:6px}
+    .vnum{padding-top:0}
+  }
+  @media (prefers-reduced-motion:no-preference){
+    .pop{transition:box-shadow .2s ease}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="sheet-head">
+    <div class="eyebrow">APW-115 · design review</div>
+    <h1>Three dialects for one popup.</h1>
+    <p class="lede">The same 336 × 206 instrument, the same four states of truth, three ways of being quiet. Written in the Apple idiom because the product is an Apple accessory — then held to Windows: an opaque-or-acrylic choice, a licence-safe typeface, and a system accent that is never assumed.</p>
+    <div class="meta">HTML approximation at 100 % scale, not a WPF render. Blur is CSS <code>backdrop-filter</code> standing in for DWM acrylic. Inter stands in for SF Pro; Cascadia Mono stands in for SF Mono. The blue is a stand-in for the Windows system accent, resolved at runtime.</div>
+  </header>
+
+  <section class="variant" id="v1">
+    <div class="vhead">
+      <div class="vnum">01</div>
+      <div class="vtext"><h2>Popover <span class="vtag">macOS material</span></h2>
+        <p>A translucent system surface, full-bleed hairlines, monochrome numerals, and colour used only when a component needs attention. Of the three it is closest to how macOS presents an accessory, and the only one that depends on a Windows composition API to look right.</p></div>
+    </div>
+<div class="band band-light dv1">
+  <div class="band-in">
+    <figure class="shot">
+      <div class="pop v1 t-light">
+    <div class="p1__head"><svg class="glyph" viewBox="0 0 32 32" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 26v-8l4-4 4 4v8m-1-4v4m10-8v8l4 4 4-4v-8m-1 4v-4"/><path d="M19 29h19l3 4-3 4H19l-3-4z"/></g></svg><span class="p1__model">AirPods Pro</span>
+      <span class="p1__status"><i class="dot"></i>Nearby</span></div>
+    <div class="p1__rule"></div>
+    <div class="p1__cols"><div class="p1__col">
+        <div class="p1__labels"><span class="p1__label">Left</span></div>
+        <div class="p1__value">80<span class="p1__pct">%</span></div>
+        <div class="p1__rail"><i style="width:80%"></i></div></div>
+<div class="p1__col">
+        <div class="p1__labels"><span class="p1__label">Right</span></div>
+        <div class="p1__value">70<span class="p1__pct">%</span></div>
+        <div class="p1__rail"><i style="width:70%"></i></div></div>
+<div class="p1__col">
+        <div class="p1__labels"><span class="p1__label">Case</span></div>
+        <div class="p1__value">60<span class="p1__pct">%</span></div>
+        <div class="p1__rail"><i style="width:60%"></i></div></div></div>
+    <div class="p1__foot">Both in case · lid open</div>
+  </div>
+      <figcaption><b>Lid open, idle</b><span>Both buds and the case known. Nothing is connected and nothing is claimed.</span></figcaption>
+    </figure><figure class="shot">
+      <div class="pop v1 t-light">
+    <div class="p1__head"><svg class="glyph" viewBox="0 0 32 32" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 26v-8l4-4 4 4v8m-1-4v4m10-8v8l4 4 4-4v-8m-1 4v-4"/><path d="M19 29h19l3 4-3 4H19l-3-4z"/></g></svg><span class="p1__model">AirPods Pro</span>
+      <span class="p1__status"><i class="dot"></i>Nearby</span></div>
+    <div class="p1__rule"></div>
+    <div class="p1__cols"><div class="p1__col">
+        <div class="p1__labels"><span class="p1__label">Left</span></div>
+        <div class="p1__value">80<span class="p1__pct">%</span><svg class="bolt" viewBox="0 0 7 11" aria-hidden="true"><path d="M4.4 0 0 6.6h2.7L2.1 11 7 4.4H4.7z" fill="currentColor"/></svg></div>
+        <div class="p1__rail"><i style="width:80%"></i></div></div>
+<div class="p1__col">
+        <div class="p1__labels"><span class="p1__label">Right</span></div>
+        <div class="p1__value is-unknown">—</div>
+        <div class="p1__rail is-unknown"><i style="width:0%"></i></div></div>
+<div class="p1__col">
+        <div class="p1__labels"><span class="p1__label">Case</span></div>
+        <div class="p1__value">60<span class="p1__pct">%</span><svg class="bolt" viewBox="0 0 7 11" aria-hidden="true"><path d="M4.4 0 0 6.6h2.7L2.1 11 7 4.4H4.7z" fill="currentColor"/></svg></div>
+        <div class="p1__rail"><i style="width:60%"></i></div></div></div>
+    <div class="p1__foot">Lid open · levels may take a moment</div>
+  </div>
+      <figcaption><b>Charging, one unknown</b><span>Bolts on the two charging components. Unknown is an em dash, never 0 %.</span></figcaption>
+    </figure>
+  </div>
+</div>
+<div class="band band-dark dv1">
+  <div class="band-in">
+    <figure class="shot">
+      <div class="pop v1 t-dark">
+    <div class="p1__head"><svg class="glyph" viewBox="0 0 32 32" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 26v-8l4-4 4 4v8m-1-4v4m10-8v8l4 4 4-4v-8m-1 4v-4"/><path d="M19 29h19l3 4-3 4H19l-3-4z"/></g></svg><span class="p1__model">AirPods Pro</span>
+      <span class="p1__status"><i class="dot is-on"></i>Connected</span></div>
+    <div class="p1__rule"></div>
+    <div class="p1__cols"><div class="p1__col">
+        <div class="p1__labels"><span class="p1__label">Left<svg class="ear" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span></div>
+        <div class="p1__value">80<span class="p1__pct">%</span></div>
+        <div class="p1__rail"><i style="width:80%"></i></div></div>
+<div class="p1__col">
+        <div class="p1__labels"><span class="p1__label">Right<svg class="ear" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span></div>
+        <div class="p1__value">10<span class="p1__pct">%</span></div>
+        <div class="p1__rail"><i style="width:10%"></i></div><div class="lowline">Low</div></div>
+<div class="p1__col">
+        <div class="p1__labels"><span class="p1__label">Case</span></div>
+        <div class="p1__value">60<span class="p1__pct">%</span></div>
+        <div class="p1__rail"><i style="width:60%"></i></div></div></div>
+    <div class="p1__foot">Both in ear · Right low</div>
+  </div>
+      <figcaption><b>Both in ear, right low</b><span>Ear markers on both labels. The low value keeps its number and gains a word.</span></figcaption>
+    </figure><figure class="shot">
+      <div class="pop v1 t-dark">
+    <div class="p1__head"><svg class="glyph" viewBox="0 0 32 32" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 27v-8a11 11 0 0 1 22 0v8M21 23h4v9h-4zM39 23h4v9h-4z"/></g></svg><span class="p1__model">AirPods Max</span>
+      <span class="p1__status"><i class="dot is-on"></i>Connected</span></div>
+    <div class="p1__rule"></div>
+    <div class="p1__cols is-single">
+      <div class="p1__col"><div class="p1__label">Headphones</div>
+        <div class="p1__value">70<span class="p1__pct">%</span></div>
+        <div class="p1__rail"><i style="width:70%"></i></div></div>
+    </div>
+    <div class="p1__foot">One device · coarse levels</div>
+  </div>
+      <figcaption><b>AirPods Max</b><span>One value, one rail. No left, right or case slots to sit empty.</span></figcaption>
+    </figure>
+  </div>
+</div>
+    <ul class="vnotes"><li><b>Surface</b><span>Vibrancy, not decoration. 72 % surface over a blur: the desktop shows through, the text never fights it.</span></li><li><b>Numbers</b><span>26 px semibold, tabular. The per cent sign drops to 13 px and secondary grey, so the digits carry the eye.</span></li><li><b>Colour</b><span>Monochrome numerals. Red only when a component is low, blue only for the charging bolt and a live connection.</span></li></ul>
+  </section><section class="variant" id="v2">
+    <div class="vhead">
+      <div class="vnum">02</div>
+      <div class="vtext"><h2>Widget <span class="vtag">iOS battery widget</span></h2>
+        <p>An opaque card with large numerals and capsule rails whose colour follows the level. It is the variant that reads as Apple in a screenshot, and the one that looks least like a Windows window. It needs no compositor support and no blur.</p></div>
+    </div>
+<div class="band band-light dv2">
+  <div class="band-in">
+    <figure class="shot">
+      <div class="pop v2 t-light">
+    <div class="p2__head"><span class="p2__model">AirPods Pro</span>
+      <span class="p2__status"><i class="dot"></i>Nearby</span></div>
+    <div class="p2__cols"><div class="p2__col">
+        <div class="p2__labels"><span class="p2__label">Left ear</span></div>
+        <div class="p2__value">80<span class="p2__pct">%</span></div><div class="p2__rail"><i class="" style="width:80%"></i></div></div>
+<div class="p2__col">
+        <div class="p2__labels"><span class="p2__label">Right ear</span></div>
+        <div class="p2__value">70<span class="p2__pct">%</span></div><div class="p2__rail"><i class="" style="width:70%"></i></div></div>
+<div class="p2__col">
+        <div class="p2__labels"><span class="p2__label">Case</span></div>
+        <div class="p2__value">60<span class="p2__pct">%</span></div><div class="p2__rail"><i class="" style="width:60%"></i></div></div></div>
+    <div class="p2__foot">Both in case · lid open</div>
+  </div>
+      <figcaption><b>Lid open, idle</b><span>Both buds and the case known. Nothing is connected and nothing is claimed.</span></figcaption>
+    </figure><figure class="shot">
+      <div class="pop v2 t-light">
+    <div class="p2__head"><span class="p2__model">AirPods Pro</span>
+      <span class="p2__status"><i class="dot"></i>Nearby</span></div>
+    <div class="p2__cols"><div class="p2__col">
+        <div class="p2__labels"><span class="p2__label">Left ear</span></div>
+        <div class="p2__value">80<span class="p2__pct">%</span><svg class="bolt" viewBox="0 0 7 11" aria-hidden="true"><path d="M4.4 0 0 6.6h2.7L2.1 11 7 4.4H4.7z" fill="currentColor"/></svg></div><div class="p2__rail"><i class="" style="width:80%"></i></div></div>
+<div class="p2__col">
+        <div class="p2__labels"><span class="p2__label">Right ear</span></div>
+        <div class="p2__value is-unknown">—</div><div class="p2__rail is-unknown"></div></div>
+<div class="p2__col">
+        <div class="p2__labels"><span class="p2__label">Case</span></div>
+        <div class="p2__value">60<span class="p2__pct">%</span><svg class="bolt" viewBox="0 0 7 11" aria-hidden="true"><path d="M4.4 0 0 6.6h2.7L2.1 11 7 4.4H4.7z" fill="currentColor"/></svg></div><div class="p2__rail"><i class="" style="width:60%"></i></div></div></div>
+    <div class="p2__foot">Lid open · levels may take a moment</div>
+  </div>
+      <figcaption><b>Charging, one unknown</b><span>Bolts on the two charging components. Unknown is an em dash, never 0 %.</span></figcaption>
+    </figure>
+  </div>
+</div>
+<div class="band band-dark dv2">
+  <div class="band-in">
+    <figure class="shot">
+      <div class="pop v2 t-dark">
+    <div class="p2__head"><span class="p2__model">AirPods Pro</span>
+      <span class="p2__status"><i class="dot is-on"></i>Connected</span></div>
+    <div class="p2__cols"><div class="p2__col">
+        <div class="p2__labels"><span class="p2__label">Left ear<svg class="ear" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span></div>
+        <div class="p2__value">80<span class="p2__pct">%</span></div><div class="p2__rail"><i class="" style="width:80%"></i></div></div>
+<div class="p2__col">
+        <div class="p2__labels"><span class="p2__label">Right ear<svg class="ear" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span></div>
+        <div class="p2__value">10<span class="p2__pct">%</span></div><div class="p2__rail"><i class=" is-low" style="width:10%"></i></div><div class="lowline">Low</div></div>
+<div class="p2__col">
+        <div class="p2__labels"><span class="p2__label">Case</span></div>
+        <div class="p2__value">60<span class="p2__pct">%</span></div><div class="p2__rail"><i class="" style="width:60%"></i></div></div></div>
+    <div class="p2__foot">Both in ear · Right low</div>
+  </div>
+      <figcaption><b>Both in ear, right low</b><span>Ear markers on both labels. The low value keeps its number and gains a word.</span></figcaption>
+    </figure><figure class="shot">
+      <div class="pop v2 t-dark">
+    <div class="p2__head"><span class="p2__model">AirPods Max</span>
+      <span class="p2__status"><i class="dot is-on"></i>Connected</span></div>
+    <div class="p2__cols is-single">
+      <div class="p2__col"><div class="p2__label">Headphones</div>
+        <div class="p2__value">70<span class="p2__pct">%</span></div><div class="p2__rail"><i class="" style="width:70%"></i></div></div></div>
+    <div class="p2__foot">One device · coarse levels</div>
+  </div>
+      <figcaption><b>AirPods Max</b><span>One value, one rail. No left, right or case slots to sit empty.</span></figcaption>
+    </figure>
+  </div>
+</div>
+    <ul class="vnotes"><li><b>Surface</b><span>Solid and edge-defined. 22 px continuous corners, no border, a shadow soft enough to imply elevation without a visible edge.</span></li><li><b>Numbers</b><span>32 px, 640 weight, −3.5 % tracking. The value is the whole point of the cell; labels step back to 11 px secondary.</span></li><li><b>Colour</b><span>The rail carries level: green in normal range, red at 10 %. The number stays neutral so colour is never the only signal.</span></li></ul>
+  </section><section class="variant" id="v3">
+    <div class="vhead">
+      <div class="vnum">03</div>
+      <div class="vtext"><h2>Studio <span class="vtag">Apple pro app</span></h2>
+        <p>The instrument panel from Apple’s professional tools: near-black surface, hairline rules, monospaced figures, and ten discrete ticks instead of a continuous bar. Denser than the other two, and the easiest to justify inside a Windows tray.</p></div>
+    </div>
+<div class="band band-light dv3">
+  <div class="band-in">
+    <figure class="shot">
+      <div class="pop v3 t-light">
+    <div class="p3__head"><span class="p3__model">AirPods Pro</span>
+      <span class="p3__status"><i class="dot"></i>Nearby</span></div>
+    <div class="p3__rule"></div>
+    <div class="p3__grid"><div class="p3__cell">
+        <div class="p3__labels"><span class="p3__label">Left</span></div>
+        <div class="p3__value">80<span class="p3__pct">%</span></div><div class="p3__ticks"><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class=""></i><i class=""></i></div></div>
+<div class="p3__cell is-ruled">
+        <div class="p3__labels"><span class="p3__label">Right</span></div>
+        <div class="p3__value">70<span class="p3__pct">%</span></div><div class="p3__ticks"><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class=""></i><i class=""></i><i class=""></i></div></div>
+<div class="p3__cell is-ruled">
+        <div class="p3__labels"><span class="p3__label">Case</span></div>
+        <div class="p3__value">60<span class="p3__pct">%</span></div><div class="p3__ticks"><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div></div></div>
+    <div class="p3__foot">Both in case · lid open</div>
+  </div>
+      <figcaption><b>Lid open, idle</b><span>Both buds and the case known. Nothing is connected and nothing is claimed.</span></figcaption>
+    </figure><figure class="shot">
+      <div class="pop v3 t-light">
+    <div class="p3__head"><span class="p3__model">AirPods Pro</span>
+      <span class="p3__status"><i class="dot"></i>Nearby</span></div>
+    <div class="p3__rule"></div>
+    <div class="p3__grid"><div class="p3__cell">
+        <div class="p3__labels"><span class="p3__label">Left</span></div>
+        <div class="p3__value">80<span class="p3__pct">%</span><svg class="bolt" viewBox="0 0 7 11" aria-hidden="true"><path d="M4.4 0 0 6.6h2.7L2.1 11 7 4.4H4.7z" fill="currentColor"/></svg></div><div class="p3__ticks"><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class=""></i><i class=""></i></div></div>
+<div class="p3__cell is-ruled">
+        <div class="p3__labels"><span class="p3__label">Right</span></div>
+        <div class="p3__value is-unknown">—</div><div class="p3__ticks"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div></div>
+<div class="p3__cell is-ruled">
+        <div class="p3__labels"><span class="p3__label">Case</span></div>
+        <div class="p3__value">60<span class="p3__pct">%</span><svg class="bolt" viewBox="0 0 7 11" aria-hidden="true"><path d="M4.4 0 0 6.6h2.7L2.1 11 7 4.4H4.7z" fill="currentColor"/></svg></div><div class="p3__ticks"><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div></div></div>
+    <div class="p3__foot">Lid open · levels may take a moment</div>
+  </div>
+      <figcaption><b>Charging, one unknown</b><span>Bolts on the two charging components. Unknown is an em dash, never 0 %.</span></figcaption>
+    </figure>
+  </div>
+</div>
+<div class="band band-dark dv3">
+  <div class="band-in">
+    <figure class="shot">
+      <div class="pop v3 t-dark">
+    <div class="p3__head"><span class="p3__model">AirPods Pro</span>
+      <span class="p3__status"><i class="dot is-on"></i>Connected</span></div>
+    <div class="p3__rule"></div>
+    <div class="p3__grid"><div class="p3__cell">
+        <div class="p3__labels"><span class="p3__label">Left<svg class="ear" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span></div>
+        <div class="p3__value">80<span class="p3__pct">%</span></div><div class="p3__ticks"><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class=""></i><i class=""></i></div></div>
+<div class="p3__cell is-ruled">
+        <div class="p3__labels"><span class="p3__label">Right<svg class="ear" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span></div>
+        <div class="p3__value">10<span class="p3__pct">%</span></div><div class="p3__ticks"><i class="is-on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div><div class="lowline">Low</div></div>
+<div class="p3__cell is-ruled">
+        <div class="p3__labels"><span class="p3__label">Case</span></div>
+        <div class="p3__value">60<span class="p3__pct">%</span></div><div class="p3__ticks"><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div></div></div>
+    <div class="p3__foot">Both in ear · Right low</div>
+  </div>
+      <figcaption><b>Both in ear, right low</b><span>Ear markers on both labels. The low value keeps its number and gains a word.</span></figcaption>
+    </figure><figure class="shot">
+      <div class="pop v3 t-dark">
+    <div class="p3__head"><span class="p3__model">AirPods Max</span>
+      <span class="p3__status"><i class="dot is-on"></i>Connected</span></div>
+    <div class="p3__rule"></div>
+    <div class="p3__grid is-single">
+      <div class="p3__cell"><div class="p3__label">Headphones</div>
+        <div class="p3__value">70<span class="p3__pct">%</span></div><div class="p3__ticks"><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i class=""></i><i class=""></i><i class=""></i></div></div></div>
+    <div class="p3__foot">One device · coarse levels</div>
+  </div>
+      <figcaption><b>AirPods Max</b><span>One value, one rail. No left, right or case slots to sit empty.</span></figcaption>
+    </figure>
+  </div>
+</div>
+    <ul class="vnotes"><li><b>Surface</b><span>Opaque, 8 px corners, 1 px hairline border. Nothing floats; the panel is a tool, not a card.</span></li><li><b>Numbers</b><span>21 px monospaced with tabular figures and a 11 px secondary per cent. Values line up as a column, which is what a pro app does.</span></li><li><b>Colour</b><span>Ten ticks per component, so the 10 % step is visible rather than smoothed. Accent is the charging bolt only.</span></li></ul>
+  </section>
+
+  <section class="cmp">
+    <h2>What each one costs</h2>
+    <table>
+      <colgroup><col style="width:25%"><col style="width:25%"><col style="width:25%"><col style="width:25%"></colgroup>
+      <thead><tr><th>Decision</th><th>01 Popover</th><th>02 Widget</th><th>03 Studio</th></tr></thead>
+      <tbody>
+        <tr><th>Surface</th><td>Translucent material, 72 %</td><td>Opaque, edge-defined</td><td>Opaque, hairline-bordered</td></tr>
+        <tr><th>Windows cost</th><td>Needs DWM acrylic or a solid fallback; the Windows 10 path has to be designed, not assumed</td><td>None — plain window, rounded corners</td><td>None — plain window</td></tr>
+        <tr><th>Corner radius</th><td>12 DIP</td><td>22 DIP</td><td>8 DIP</td></tr>
+        <tr><th>Type</th><td>13 / 12 / 26</td><td>15 / 12 / 32</td><td>12 caps / 12 / 21 mono</td></tr>
+        <tr><th>Battery read</th><td>Number first, thin rail second</td><td>Number dominant, capsule rail coloured</td><td>Number plus ten discrete ticks</td></tr>
+        <tr><th>Colour logic</th><td>Monochrome; accent on charge and connection only</td><td>Level-coloured rail; numbers stay neutral</td><td>Monochrome ticks; accent on charge only</td></tr>
+        <tr><th>Label voice</th><td>Sentence case</td><td>Sentence case, longer (“Left ear”)</td><td>Tracked caps</td></tr>
+        <tr><th>Risk</th><td>Reads native on macOS, foreign on Windows taskbar</td><td>Most “Apple” in a screenshot, least native as a window</td><td>Least Apple-marketing, most defensible for a tray tool</td></tr>
+      </tbody>
+    </table>
+
+    <p class="tablenote">Acrylic on Windows 11 is requested through <code>DWMWA_SYSTEMBACKDROP_TYPE</code>; on Windows 10 the same window needs an accent-policy fallback or an opaque fill. The choice changes the popup’s character, so it is a design decision, not a build detail.</p>
+
+    <div class="pick">
+      <h3>My call: 01, with 03’s tick rail as the battery detail</h3>
+      <p>Popover carries the Apple feeling without pretending to be macOS chrome: one material surface, full-bleed hairlines, numbers doing the talking. Its weakness is the acrylic dependency — if the WPF window cannot take a DWM backdrop, it degrades to a flat card and loses half its character. Studio is the safe build; Widget is the one that photographs best and belongs least on a Windows desktop.</p>
+    </div>
+  </section>
+
+  <footer>
+    Preview only. No Apple artwork, logo or product photography is used; the device glyphs are original line geometry from the existing contract. Nothing here is signed off — POPUP.md remains authoritative until a direction is chosen, at which point the tokens, states and motion spec get rewritten around it. Inter is fetched from Google Fonts; offline, the page falls back to Segoe UI Variable and the typographic half of the Apple effect goes with it.
+  </footer>
+</div>
+</body>
+</html>

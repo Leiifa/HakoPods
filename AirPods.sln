@@ -1,0 +1,41 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1B6BB377-DECF-4574-A785-96344BD94933}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AirPods.Core", "src\AirPods.Core\AirPods.Core.csproj", "{88EA1B39-35A2-4606-9AE1-2B176F0205F7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AirPods.App", "src\AirPods.App\AirPods.App.csproj", "{9B3EC07D-31F3-4015-B6EC-882395879BE5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AirPods.Core.Tests", "src\AirPods.Core.Tests\AirPods.Core.Tests.csproj", "{E30E0B8B-C9C2-464A-8E6D-87C16630E2FF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{88EA1B39-35A2-4606-9AE1-2B176F0205F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88EA1B39-35A2-4606-9AE1-2B176F0205F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88EA1B39-35A2-4606-9AE1-2B176F0205F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88EA1B39-35A2-4606-9AE1-2B176F0205F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B3EC07D-31F3-4015-B6EC-882395879BE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B3EC07D-31F3-4015-B6EC-882395879BE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B3EC07D-31F3-4015-B6EC-882395879BE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B3EC07D-31F3-4015-B6EC-882395879BE5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E30E0B8B-C9C2-464A-8E6D-87C16630E2FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E30E0B8B-C9C2-464A-8E6D-87C16630E2FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E30E0B8B-C9C2-464A-8E6D-87C16630E2FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E30E0B8B-C9C2-464A-8E6D-87C16630E2FF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{88EA1B39-35A2-4606-9AE1-2B176F0205F7} = {1B6BB377-DECF-4574-A785-96344BD94933}
+		{9B3EC07D-31F3-4015-B6EC-882395879BE5} = {1B6BB377-DECF-4574-A785-96344BD94933}
+		{E30E0B8B-C9C2-464A-8E6D-87C16630E2FF} = {1B6BB377-DECF-4574-A785-96344BD94933}
+	EndGlobalSection
+EndGlobal

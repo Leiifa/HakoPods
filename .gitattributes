@@ -1,0 +1,11 @@
+# Normalise line endings so Windows and CI agree.
+* text=auto eol=lf
+
+# Binary assets: never let git rewrite these.
+*.png binary
+*.ico binary
+*.jpg binary
+*.svg text eol=lf
+
+# Visual Studio solution files are CRLF by convention.
+*.sln text eol=crlf

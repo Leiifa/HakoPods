@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>APW-115 — A · Card, final</title>
+<meta name="color-scheme" content="light">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box}
+  :root{--paper:#f5f5f7;--ink:#1d1d1f;--ink2:#6e6e73;--line:#d2d2d7;--line-soft:#e4e4e9;
+        --font:'Inter','SF Pro Text',-apple-system,'Segoe UI Variable Text',system-ui,sans-serif}
+  html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:clip}
+  body{margin:0;overflow-x:clip;background:var(--paper);color:var(--ink);font-family:var(--font);
+        font-size:16px;line-height:1.5}
+  .wrap{max-width:1180px;margin:0 auto;padding:64px 32px 96px}
+  .sheet-head{max-width:780px;margin-bottom:44px}
+  .eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);margin-bottom:16px}
+  h1{font-size:42px;line-height:1.08;letter-spacing:-.025em;font-weight:600;margin:0 0 18px;text-wrap:balance}
+  .lede{font-size:17px;line-height:1.55;color:#3a3a3c;margin:0 0 22px;letter-spacing:-.005em;max-width:64ch}
+  .meta{font-size:12px;line-height:1.6;color:var(--ink2);border-top:1px solid var(--line);padding-top:14px;max-width:72ch}
+
+  .band{margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);padding:42px 0 36px}
+  .band-in{max-width:1180px;margin:0 auto;padding:0 32px;display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));gap:40px;justify-items:center}
+  .shot{margin:0;display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;max-width:420px}
+  .shot figcaption{display:flex;flex-direction:column;gap:3px;font-size:12px;line-height:1.45;
+                    width:100%;max-width:336px}
+  .shot figcaption b{font-weight:600;letter-spacing:-.005em}
+  .band-light{background:#f0f0f3}
+  .band-light figcaption b{color:#1d1d1f}
+  .band-light figcaption span{color:#5c5c60}
+  .band-dark{background:#000000}
+  .band-dark figcaption b{color:#f5f5f7}
+  .band-dark figcaption span{color:#a1a1a6}
+
+  /* ---------- A · Card ---------- */
+  .pop{width:336px;height:206px;flex:0 0 auto;display:flex;flex-direction:column;overflow:hidden;
+        font-family:var(--font);font-variant-numeric:tabular-nums;position:relative;
+        border-radius:22px;padding:16px 18px;background:var(--surface);color:var(--text);
+        box-shadow:0 0 0 .5px rgba(0,0,0,.045),
+                   0 2px 4px -1px rgba(0,0,0,.06),
+                   0 14px 34px -12px rgba(0,0,0,.30)}
+  .pop .dot{width:6px;height:6px;border-radius:50%;display:inline-block;background:currentColor;opacity:.32}
+  .pop .dot.is-on{opacity:1;background:var(--accent)}
+  .pop .bolt{width:9px;height:13px;margin-left:4px;color:var(--accent);align-self:flex-start;margin-top:3px}
+  .pop .ear{width:9px;height:9px;margin-left:4px;opacity:.75}
+  .head{display:flex;align-items:baseline;gap:8px}
+  .model{font-size:15px;font-weight:600;letter-spacing:-.02em}
+  .status{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)}
+  .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:auto 0;padding-top:12px}
+  .cols.is-single{grid-template-columns:1fr}
+  .labels{display:flex;align-items:center;gap:4px;min-height:13px}
+  .label{font-size:12px;color:var(--text2);letter-spacing:.005em}
+  .value{white-space:nowrap;font-size:32px;line-height:1;font-weight:600;letter-spacing:-.04em;
+          margin-top:8px;display:flex;align-items:baseline}
+  .value.is-unknown{color:var(--text2);font-weight:400;font-size:28px;letter-spacing:0}
+  .pct{font-size:17px;font-weight:400;color:var(--text2);margin-left:1px;letter-spacing:-.01em}
+  .rail{height:6px;border-radius:3px;background:var(--track);margin-top:12px;overflow:hidden}
+  .rail i{display:block;height:100%;background:var(--fill);border-radius:3px}
+  .rail i.is-low{background:var(--warn)}
+  .rail.is-unknown{background:transparent;border:1px dashed var(--dash)}
+  .lowline{font-size:12px;font-weight:600;color:var(--warn);margin-top:6px;letter-spacing:.01em}
+  .foot{margin-top:auto;font-size:12px;color:var(--text2);letter-spacing:-.005em}
+  .is-single .value{font-size:44px;justify-content:center}
+  .is-single .label{justify-content:center;display:flex;text-align:center}
+  .is-single .rail{width:190px;margin-left:auto;margin-right:auto;margin-top:16px}
+
+  .t-light{--surface:#ffffff;--text:#1d1d1f;--text2:#6e6e73;--track:#eaeaee;
+            --accent:#0071e3;--warn:#d70015;--green:#248a3d;--fill:var(--green);--dash:rgba(0,0,0,.24)}
+  .t-dark{--surface:#1c1c1e;--text:#f5f5f7;--text2:#a1a1a6;--track:#3a3a3c;
+           --accent:#0a84ff;--warn:#ff453a;--green:#30d158;--fill:var(--green);--dash:rgba(255,255,255,.30)}
+
+  .sect{margin-top:60px;padding-top:36px;border-top:1px solid var(--line)}
+  .sect h2{font-size:25px;line-height:1.2;letter-spacing:-.02em;font-weight:600;margin:0 0 8px}
+  .sect > p{margin:0 0 24px;font-size:15px;line-height:1.55;color:#48484a;max-width:68ch}
+
+  .scale-stack{display:flex;flex-direction:column;align-items:center;gap:52px;padding:4px 0}
+  .shot.s150{max-width:504px}
+  .shot.s200{max-width:672px}
+  .shot.s150 figcaption,.shot.s200 figcaption{max-width:100%}
+  .zoombox{position:relative}
+  .zoombox .pop{position:absolute;top:0;left:0}
+  .z150{width:504px;height:309px}
+  .z200{width:672px;height:412px}
+
+  table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;vertical-align:top;padding:11px 16px 11px 0;border-bottom:1px solid var(--line-soft)}
+  thead th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);
+            font-weight:600;border-bottom:1px solid var(--line)}
+  tbody th{font-weight:500;color:#48484a;width:22%}
+  tbody td b{font-weight:600}
+
+  .note{margin-top:26px;padding:22px 24px;border-radius:14px;background:#fff;border:1px solid var(--line-soft);max-width:76ch}
+  .note h3{margin:0 0 8px;font-size:15px;font-weight:600;letter-spacing:-.01em}
+  .note p{margin:0 0 10px;font-size:14px;line-height:1.55;color:#48484a}
+  .note p:last-child{margin-bottom:0}
+  footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--line);
+          font-size:12.5px;line-height:1.6;color:var(--ink2);max-width:80ch}
+  @media (max-width:900px){
+    .wrap{padding:40px 20px 64px}
+    h1{font-size:30px}
+    .band-in{grid-template-columns:1fr;gap:32px;padding:0 20px}
+
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="sheet-head">
+    <div class="eyebrow">APW-115 · locked</div>
+    <h1>A · Card, held.</h1>
+    <p class="lede">One deviation from the sheet you approved: the shadow was doing too little. It now has three layers, including a half-pixel ring at 4.5 % — not a border, but enough that the card keeps an edge over a white document. Everything else is unchanged from the version you picked.</p>
+    <div class="meta">336 × 206 DIP, eight states, 100 / 150 / 200 %. Inter stands in for SF Pro; the blue is a stand-in for the Windows system accent, resolved at runtime.</div>
+  </header>
+
+  <div class="band band-light ">
+  <div class="band-in"><figure class="shot "><div class="pop t-light">
+    <div class="head"><span class="model">AirPods Pro</span>
+      <span class="status"><i class="dot"></i>Nearby</span></div>
+    <div class="cols"><div class="col">
+        <div class="labels"><span class="label">Left</span></div>
+        <div class="value">80<span class="pct">%</span></div><div class="rail"><i class="" style="width:80%"></i></div></div><div class="col">
+        <div class="labels"><span class="label">Right</span></div>
+        <div class="value">70<span class="pct">%</span></div><div class="rail"><i class="" style="width:70%"></i></div></div><div class="col">
+        <div class="labels"><span class="label">Case</span></div>
+        <div class="value">60<span class="pct">%</span></div><div class="rail"><i class="" style="width:60%"></i></div></div></div>
+    <div class="foot">Both in case · lid open</div>
+  </div>
+      <figcaption><b>Lid open, idle</b><span>Both buds and the case known. Nothing is connected and nothing is claimed.</span></figcaption>
+    </figure><figure class="shot "><div class="pop t-light">
+    <div class="head"><span class="model">AirPods Pro</span>
+      <span class="status"><i class="dot"></i>Nearby</span></div>
+    <div class="cols"><div class="col">
+        <div class="labels"><span class="label">Left</span></div>
+        <div class="value">80<span class="pct">%</span><svg class="bolt" viewBox="0 0 7 11" aria-hidden="true"><path d="M4.4 0 0 6.6h2.7L2.1 11 7 4.4H4.7z" fill="currentColor"/></svg></div><div class="rail"><i class="" style="width:80%"></i></div></div><div class="col">
+        <div class="labels"><span class="label">Right</span></div>
+        <div class="value is-unknown">—</div><div class="rail is-unknown"></div></div><div class="col">
+        <div class="labels"><span class="label">Case</span></div>
+        <div class="value">60<span class="pct">%</span><svg class="bolt" viewBox="0 0 7 11" aria-hidden="true"><path d="M4.4 0 0 6.6h2.7L2.1 11 7 4.4H4.7z" fill="currentColor"/></svg></div><div class="rail"><i class="" style="width:60%"></i></div></div></div>
+    <div class="foot">Lid open · levels may take a moment</div>
+  </div>
+      <figcaption><b>Charging, one unknown</b><span>Bolts on the two charging components. Unknown is an em dash, never 0 %.</span></figcaption>
+    </figure><figure class="shot "><div class="pop t-light">
+    <div class="head"><span class="model">AirPods Pro</span>
+      <span class="status"><i class="dot"></i>Not connected</span></div>
+    <div class="cols"><div class="col">
+        <div class="labels"><span class="label">Left</span></div>
+        <div class="value is-unknown">—</div><div class="rail is-unknown"></div></div><div class="col">
+        <div class="labels"><span class="label">Right</span></div>
+        <div class="value is-unknown">—</div><div class="rail is-unknown"></div></div><div class="col">
+        <div class="labels"><span class="label">Case</span></div>
+        <div class="value is-unknown">—</div><div class="rail is-unknown"></div></div></div>
+    <div class="foot">Last values were older than 60 s</div>
+  </div>
+      <figcaption><b>Not connected</b><span>After the freshness window every measurement clears to unknown. Silence alone is never read as a disconnect.</span></figcaption>
+    </figure><figure class="shot "><div class="pop t-light">
+    <div class="head"><span class="model">AirPods</span>
+      <span class="status"><i class="dot"></i>Nearby</span></div>
+    <div class="cols"><div class="col">
+        <div class="labels"><span class="label">Left</span></div>
+        <div class="value">80<span class="pct">%</span></div><div class="rail"><i class="" style="width:80%"></i></div></div><div class="col">
+        <div class="labels"><span class="label">Right</span></div>
+        <div class="value">70<span class="pct">%</span></div><div class="rail"><i class="" style="width:70%"></i></div></div><div class="col">
+        <div class="labels"><span class="label">Case</span></div>
+        <div class="value is-unknown">—</div><div class="rail is-unknown"></div></div></div>
+    <div class="foot">Case not reported</div>
+  </div>
+      <figcaption><b>Unknown model</b><span>No family name from the endpoint, so the header falls back to “AirPods”.</span></figcaption>
+    </figure></div>
+</div>
+  <div class="band band-dark ">
+  <div class="band-in"><figure class="shot "><div class="pop t-dark">
+    <div class="head"><span class="model">AirPods Pro</span>
+      <span class="status"><i class="dot is-on"></i>Connected</span></div>
+    <div class="cols"><div class="col">
+        <div class="labels"><span class="label">Left<svg class="ear" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span></div>
+        <div class="value">80<span class="pct">%</span></div><div class="rail"><i class="" style="width:80%"></i></div></div><div class="col">
+        <div class="labels"><span class="label">Right<svg class="ear" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span></div>
+        <div class="value">10<span class="pct">%</span></div><div class="rail"><i class=" is-low" style="width:10%"></i></div><div class="lowline">Low</div></div><div class="col">
+        <div class="labels"><span class="label">Case</span></div>
+        <div class="value">60<span class="pct">%</span></div><div class="rail"><i class="" style="width:60%"></i></div></div></div>
+    <div class="foot">Both in ear · Right low</div>
+  </div>
+      <figcaption><b>Both in ear, right low</b><span>Ear markers on both labels. The low value keeps its number and gains a word.</span></figcaption>
+    </figure><figure class="shot "><div class="pop t-dark">
+    <div class="head"><span class="model">AirPods Max</span>
+      <span class="status"><i class="dot is-on"></i>Connected</span></div>
+    <div class="cols is-single">
+      <div class="col"><div class="label">Headphones</div>
+        <div class="value">70<span class="pct">%</span></div><div class="rail"><i class="" style="width:70%"></i></div></div></div>
+    <div class="foot">One device · coarse levels</div>
+  </div>
+      <figcaption><b>AirPods Max</b><span>One value, one rail. No left, right or case slots to sit empty.</span></figcaption>
+    </figure><figure class="shot "><div class="pop t-dark">
+    <div class="head"><span class="model">AirPods Pro</span>
+      <span class="status"><i class="dot is-on"></i>Connected</span></div>
+    <div class="cols"><div class="col">
+        <div class="labels"><span class="label">Left<svg class="ear" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span></div>
+        <div class="value">80<span class="pct">%</span></div><div class="rail"><i class="" style="width:80%"></i></div></div><div class="col">
+        <div class="labels"><span class="label">Right</span></div>
+        <div class="value is-unknown">—</div><div class="rail is-unknown"></div></div><div class="col">
+        <div class="labels"><span class="label">Case</span></div>
+        <div class="value">60<span class="pct">%</span></div><div class="rail"><i class="" style="width:60%"></i></div></div></div>
+    <div class="foot">Right bud not reported</div>
+  </div>
+      <figcaption><b>One bud missing</b><span>The column stays. Only the value goes unknown, so the layout does not jump between adverts.</span></figcaption>
+    </figure><figure class="shot "><div class="pop t-dark">
+    <div class="head"><span class="model">AirPods Pro</span>
+      <span class="status"><i class="dot is-on"></i>Connected</span></div>
+    <div class="cols"><div class="col">
+        <div class="labels"><span class="label">Left</span></div>
+        <div class="value">80<span class="pct">%</span></div><div class="rail"><i class="" style="width:80%"></i></div></div><div class="col">
+        <div class="labels"><span class="label">Right</span></div>
+        <div class="value">70<span class="pct">%</span></div><div class="rail"><i class="" style="width:70%"></i></div></div><div class="col">
+        <div class="labels"><span class="label">Case</span></div>
+        <div class="value">10<span class="pct">%</span></div><div class="rail"><i class=" is-low" style="width:10%"></i></div><div class="lowline">Low</div></div></div>
+    <div class="foot">Case at 10 % · charge it</div>
+  </div>
+      <figcaption><b>Case low</b><span>Warning applies per component. The number stays visible and the rail keeps its length.</span></figcaption>
+    </figure></div>
+</div>
+
+  <section class="sect">
+    <h2>Scale</h2>
+    <p>The contract asks for 150 and 200 %. Both keep the composition: no font shrinks, no padding compresses, and the 22 DIP corners still read as corners rather than pills.</p>
+    <div class="band band-light" style="padding-top:34px">
+      <div class="scale-stack">
+        <figure class="shot s150">
+          <div class="zoombox z150"><div class="pop t-light" style="zoom:1.5">
+    <div class="head"><span class="model">AirPods Pro</span>
+      <span class="status"><i class="dot"></i>Nearby</span></div>
+    <div class="cols"><div class="col">
+        <div class="labels"><span class="label">Left</span></div>
+        <div class="value">80<span class="pct">%</span></div><div class="rail"><i class="" style="width:80%"></i></div></div><div class="col">
+        <div class="labels"><span class="label">Right</span></div>
+        <div class="value">70<span class="pct">%</span></div><div class="rail"><i class="" style="width:70%"></i></div></div><div class="col">
+        <div class="labels"><span class="label">Case</span></div>
+        <div class="value">60<span class="pct">%</span></div><div class="rail"><i class="" style="width:60%"></i></div></div></div>
+    <div class="foot">Both in case · lid open</div>
+  </div></div>
+          <figcaption><b>150 %</b><span>504 × 309 physical. Type, padding and the 1 DIP strokes scale together because they are all DIPs.</span></figcaption>
+        </figure>
+        <figure class="shot s200">
+          <div class="zoombox z200"><div class="pop t-light" style="zoom:2">
+    <div class="head"><span class="model">AirPods Pro</span>
+      <span class="status"><i class="dot"></i>Nearby</span></div>
+    <div class="cols"><div class="col">
+        <div class="labels"><span class="label">Left</span></div>
+        <div class="value">80<span class="pct">%</span></div><div class="rail"><i class="" style="width:80%"></i></div></div><div class="col">
+        <div class="labels"><span class="label">Right</span></div>
+        <div class="value">70<span class="pct">%</span></div><div class="rail"><i class="" style="width:70%"></i></div></div><div class="col">
+        <div class="labels"><span class="label">Case</span></div>
+        <div class="value">60<span class="pct">%</span></div><div class="rail"><i class="" style="width:60%"></i></div></div></div>
+    <div class="foot">Both in case · lid open</div>
+  </div></div>
+          <figcaption><b>200 %</b><span>672 × 412 physical. Same composition, no compression, no extra columns.</span></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="sect">
+    <h2>What changes in POPUP.md</h2>
+    <p>The states, content rules, motion timings and placement logic carry over untouched. These ten rows are the whole diff.</p>
+    <table>
+      <thead><tr><th>Decision</th><th>Today</th><th>A · Card</th></tr></thead>
+      <tbody><tr><th>Corner radius</th><td>10 DIP</td><td><b>22 DIP</b></td></tr><tr><th>Inset / padding</th><td>12 DIP outer, 20 DIP base</td><td><b>16 DIP vertical, 18 DIP horizontal</b></td></tr><tr><th>Surface</th><td>Opaque neutral + 1-DIP outline</td><td><b>Opaque neutral, shadow only (no outline)</b></td></tr><tr><th>Product name</th><td>13 / 18 semibold</td><td><b>15 / 20 semibold, −2 % tracking</b></td></tr><tr><th>Battery value</th><td>24 / 28 semibold</td><td><b>32 / 32 semibold, −4 % tracking</b></td></tr><tr><th>Labels</th><td>11 / 14 medium, tracked caps</td><td><b>12 / 16 regular, sentence case, no tracking</b></td></tr><tr><th>Battery rail</th><td>3 DIP, flat</td><td><b>6 DIP capsule, 3 DIP radius</b></td></tr><tr><th>Colour</th><td>Accent for charging and active only</td><td><b>Accent for charge and connection; green / red encode level</b></td></tr><tr><th>Typeface</th><td>Segoe UI Variable</td><td><b>SF-metric sans (Inter), bundled</b></td></tr><tr><th>Motion</th><td>160 ms in, 120 ms out</td><td><b>Unchanged</b></td></tr></tbody>
+    </table>
+
+    <div class="note">
+      <h3>Three things you should decide before I write it</h3>
+      <p><b>The typeface is the one real risk.</b> Segoe UI Variable keeps the app native and free; bundling Inter (SIL OFL, roughly 400 KB for two static weights or one variable font) is what makes this read as Apple. Without it, A degrades to “a nice Windows card” and most of the difference disappears.</p>
+      <p><b>Green is new information.</b> The current contract says the accent is for charging and active states only, and that low battery is a text cue. A adds a level colour to every rail, so the popup now communicates battery level twice — once as a number, once as a colour. That is the point of the widget idiom, but it is a contract change, not a restyle.</p>
+      <p><b>The shadow only holds while the composition is opaque.</b> If the window ever becomes translucent or the OS draws it without a shadow, the card loses its edge and a 1 DIP hairline has to come back.</p>
+    </div>
+  </section>
+
+  <footer>
+    Still a design artifact, not a build: the DOM in this file is a reference, not WPF. Renders are vector-accurate at 100 % and CSS-scaled above that. On approval I rewrite POPUP.md, regenerate the four SVGs in <code>popup/</code> and update <code>preview.html</code> so all three artefacts agree.
+  </footer>
+</div>
+</body>
+</html>
