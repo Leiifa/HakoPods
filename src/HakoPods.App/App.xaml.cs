@@ -1,5 +1,9 @@
 using System.IO;
 using System.Windows;
+using System.Windows.Media;
+using Brush = System.Windows.Media.Brush;
+using Color = System.Windows.Media.Color;
+using HakoPods.App.Popup;
 using HakoPods.App.State;
 using HakoPods.App.Tray;
 using HakoPods.Core.Bluetooth;
@@ -11,6 +15,7 @@ namespace HakoPods.App;
 public partial class App : System.Windows.Application
 {
     private TrayIconHost? _tray;
+    private PopupWindow? _popup;
     private LiveStateFeed? _feed;
     private Win32BluetoothNative? _native;
     private BluetoothConnectionManager? _connection;
@@ -42,7 +47,7 @@ public partial class App : System.Windows.Application
         // there is no way to see the five glyph states, and "it compiles" is not a demo.
         _tray = new TrayIconHost(_connection, settings.PreferredDeviceAddress, logger, includeSimulationMenu: true);
         _tray.QuitRequested += (_, _) => Shutdown();
-        _tray.PopupRequested += (_, state) => ShowPopupPlaceholder(state);
+        _tray.PopupRequested += (_, state) => ShowPopup(state);
 
         // The tray is useless without this: adverts → samples → state.
         //
@@ -53,6 +58,24 @@ public partial class App : System.Windows.Application
         _feed = new LiveStateFeed(address: null, Dispatcher);
         _feed.StateChanged += (_, state) => _tray.ApplyState(state);
         _feed.Start();
+
+        // Development aid: `HakoPods.exe --demo-popup` renders the card once so the layout can be
+        // inspected (and screenshotted) without waiting for a lid event.
+        if (e.Args.Contains("--demo-popup", StringComparer.OrdinalIgnoreCase))
+        {
+            ShowPopup(new HakoPods.Core.State.DeviceState
+            {
+                ModelName = "AirPods Pro",
+                IsPresent = true,
+                LidOpen = true,
+                LeftBatteryPercent = 80,
+                RightBatteryPercent = 5,
+                CaseBatteryPercent = 60,
+                CaseCharging = true,
+                RightInEar = true,
+                LastSeenAt = DateTimeOffset.Now,
+            });
+        }
     }
 
     protected override void OnExit(ExitEventArgs e)
@@ -82,13 +105,45 @@ public partial class App : System.Windows.Application
             : null;
     }
 
-    private static void ShowPopupPlaceholder(HakoPods.Core.State.DeviceState state)
+    private void ShowPopup(HakoPods.Core.State.DeviceState state)
     {
-        // APW-108 replaces this with the signed-off popup window.
-        System.Windows.MessageBox.Show(
-            HakoPods.Core.Presentation.TrayGlyphMapper.Describe(state),
-            "AirPods for Windows",
-            MessageBoxButton.OK,
-            MessageBoxImage.Information);
+        _popup ??= new PopupWindow();
+        _popup.Apply(state, IsDarkTheme());
+        _popup.AccentBrush = AccentBrush();
+
+        var cursor = System.Windows.Forms.Cursor.Position;
+        var screen = System.Windows.Forms.Screen.FromPoint(cursor);
+        var scale = VisualTreeHelper.GetDpi(_popup);
+
+        // Screen bounds are physical pixels; the window positions in DIPs. Divide by the monitor
+        // scale so the card lands on the right monitor before it is shown.
+        var work = new Rect(
+            screen.WorkingArea.X / scale.DpiScaleX,
+            screen.WorkingArea.Y / scale.DpiScaleY,
+            screen.WorkingArea.Width / scale.DpiScaleX,
+            screen.WorkingArea.Height / scale.DpiScaleY);
+
+        _popup.ShowAt(work, TaskbarEdge.Bottom);
+    }
+
+    private static bool IsDarkTheme()
+    {
+        using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(
+            @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+        return key?.GetValue("SystemUsesLightTheme") is int value && value == 0;
+    }
+
+    private static Brush AccentBrush()
+    {
+        // DWM stores the accent as 0xAARRGGBB; fall back to the blue used in the design renders.
+        using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\DWM");
+        if (key?.GetValue("ColorizationColor") is int raw)
+        {
+            var value = unchecked((uint)raw);
+            var colour = Color.FromRgb((byte)(value >> 16), (byte)(value >> 8), (byte)value);
+            return new SolidColorBrush(colour);
+        }
+
+        return new SolidColorBrush(Color.FromRgb(0x00, 0x71, 0xE3));
     }
 }

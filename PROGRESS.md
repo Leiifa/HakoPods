@@ -7,7 +7,7 @@
 **Last updated:** 2026-10-31 15:05 (UTC+7) · **By:** Hermes
 **Phase:** M2 — design signed off, tray done and confirming live data; popup next
 **Current milestone:** M2
-**Current task:** none — APW-108 (popup window) is next
+**Current task:** APW-108 (popup) — implemented and rendering, dismissal/DPI awaiting owner test
 
 ---
 
