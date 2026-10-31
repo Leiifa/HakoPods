@@ -533,28 +533,9 @@ public partial class App : System.Windows.Application
             // Only remember where audio was; routing waits until a bud is actually worn. Windows
             // links the pair as soon as the lid opens, buds in the case included, and switching
             // output then steals audio for nobody.
+            // HFP is owned entirely by the mic-on-demand policy: disabling it here too raced that
+            // policy and tore down the stereo profile mid-call.
             RememberCurrentOutput();
-
-            // Stereo is the default posture, but only when nothing is recording: disabling HFP
-            // unconditionally raced the mic-on-demand policy and killed the mic a tick after it
-            // was raised.
-            if (_settings.DisableHandsFreeProfile && !_capture.IsAnyCaptureActive())
-            {
-                _ = Task.Run(async () =>
-                {
-                    try
-                    {
-                        if (_address is { } address && _connection is not null)
-                        {
-                            await _connection.DisableHandsFreeAsync(address).ConfigureAwait(false);
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        // The policy is a preference; failing it must not disturb playback.
-                    }
-                });
-            }
         }
         else
         {
