@@ -25,3 +25,6 @@ CLAUDE.md
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# CI stays local until the gh token has the workflow scope (gh auth refresh -s workflow)
+.github/workflows/
