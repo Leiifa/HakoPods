@@ -56,20 +56,22 @@ public partial class PopupWindow : Window
 
     public bool IsDark { get; private set; }
 
-    public void Apply(DeviceState state, bool dark)
+    public void Apply(DeviceState state, bool dark, bool connected)
     {
         IsDark = dark;
         ApplyTheme(dark);
 
         ModelText.Text = string.IsNullOrWhiteSpace(state.ModelName) ? "AirPods" : state.ModelName;
-        StatusText.Text = state.IsPresent ? "Nearby" : "Not nearby";
-        StatusDot.Fill = state.IsPresent ? AccentBrush : Faded(0.32);
+        StatusText.Text = connected
+            ? "Connected"
+            : state.IsPresent ? "Not connected" : "Not nearby";
+        StatusDot.Fill = connected ? AccentBrush : Faded(0.32);
 
         if (state.ModelName is { } name && name.Contains("Max", StringComparison.OrdinalIgnoreCase))
         {
             StandardLayout.Visibility = Visibility.Collapsed;
             MaxLayout.Visibility = Visibility.Visible;
-            ApplySingle(MaxLabel, MaxValue, MaxPercent, MaxTrack, MaxFill, MaxLow,
+            ApplySingle(MaxLabel, MaxValue, MaxPercent, MaxTrack, MaxFill, MaxDash, MaxLow,
                 level: state.LeftBatteryPercent ?? state.RightBatteryPercent ?? state.CaseBatteryPercent,
                 charging: state.LeftCharging || state.RightCharging || state.CaseCharging,
                 railWidth: 190);
@@ -79,13 +81,13 @@ public partial class PopupWindow : Window
             StandardLayout.Visibility = Visibility.Visible;
             MaxLayout.Visibility = Visibility.Collapsed;
 
-            ApplyColumn(LeftLabel, LeftEar, LeftValue, LeftPercent, LeftBolt, LeftTrack, LeftFill, LeftLow,
+            ApplyColumn(LeftLabel, LeftEar, LeftValue, LeftPercent, LeftBolt, LeftTrack, LeftFill, LeftDash, LeftLow,
                 "Left", state.LeftBatteryPercent, state.LeftCharging, state.LeftInEar, 92);
 
-            ApplyColumn(RightLabel, RightEar, RightValue, RightPercent, RightBolt, RightTrack, RightFill, RightLow,
+            ApplyColumn(RightLabel, RightEar, RightValue, RightPercent, RightBolt, RightTrack, RightFill, RightDash, RightLow,
                 "Right", state.RightBatteryPercent, state.RightCharging, state.RightInEar, 92);
 
-            ApplyColumn(CaseLabel, null, CaseValue, CasePercent, CaseBolt, CaseTrack, CaseFill, CaseLow,
+            ApplyColumn(CaseLabel, null, CaseValue, CasePercent, CaseBolt, CaseTrack, CaseFill, CaseDash, CaseLow,
                 "Case", state.CaseBatteryPercent, state.CaseCharging, inEar: false, railWidth: 92);
         }
 
@@ -170,7 +172,7 @@ public partial class PopupWindow : Window
 
     private void ApplyColumn(
         TextBlock tbLabel, System.Windows.Shapes.Ellipse? earMark, TextBlock tbValue, TextBlock tbPercent,
-        FrameworkElement bolt, Border track, Border fill, TextBlock low,
+        FrameworkElement bolt, Border track, Border fill, System.Windows.Shapes.Rectangle dash, TextBlock low,
         string labelText, int? level, bool charging, bool inEar, double railWidth)
     {
         tbLabel.Text = labelText;
@@ -185,12 +187,12 @@ public partial class PopupWindow : Window
         }
 
         bolt.Visibility = Visibility.Collapsed;
-        ResetRail(track);
+        ResetRail(track, dash);
         ResetValue(tbValue, tbPercent, fill);
 
         if (level is null)
         {
-            RenderUnknown(tbValue, tbPercent, track);
+            RenderUnknown(tbValue, tbPercent, track, dash);
             return;
         }
 
@@ -198,19 +200,19 @@ public partial class PopupWindow : Window
     }
 
     private void ApplySingle(
-        TextBlock tbLabel, TextBlock tbValue, TextBlock tbPercent, Border track, Border fill, TextBlock low,
+        TextBlock tbLabel, TextBlock tbValue, TextBlock tbPercent, Border track, Border fill, System.Windows.Shapes.Rectangle dash, TextBlock low,
         int? level, bool charging, double railWidth)
     {
         tbLabel.Foreground = _secondary;
         low.Foreground = _lowBrush;
         low.Visibility = Visibility.Collapsed;
 
-        ResetRail(track);
+        ResetRail(track, dash);
         ResetValue(tbValue, tbPercent, fill);
 
         if (level is null)
         {
-            RenderUnknown(tbValue, tbPercent, track);
+            RenderUnknown(tbValue, tbPercent, track, dash);
             return;
         }
 
@@ -240,7 +242,7 @@ public partial class PopupWindow : Window
         }
     }
 
-    private void RenderUnknown(TextBlock tbValue, TextBlock tbPercent, Border track)
+    private void RenderUnknown(TextBlock tbValue, TextBlock tbPercent, Border track, System.Windows.Shapes.Rectangle dash)
     {
         tbValue.Text = "—";
         tbValue.FontSize = 28;
@@ -251,11 +253,14 @@ public partial class PopupWindow : Window
         // 1 DIP dashed outline at 30 % black / 34 % white: no fill, no number, no per cent sign.
         track.Background = Brushes.Transparent;
         track.BorderBrush = Faded(IsDark ? 0.34 : 0.30);
-        track.BorderThickness = new Thickness(1);
+        track.BorderThickness = new Thickness(0);
+        dash.Stroke = Faded(IsDark ? 0.34 : 0.30);
+        dash.Visibility = Visibility.Visible;
     }
 
-    private void ResetRail(Border track)
+    private void ResetRail(Border track, System.Windows.Shapes.Rectangle dash)
     {
+        dash.Visibility = Visibility.Collapsed;
         track.Background = _track;
         track.BorderThickness = new Thickness(0);
         track.BorderBrush = Brushes.Transparent;

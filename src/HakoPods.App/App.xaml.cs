@@ -14,6 +14,8 @@ namespace HakoPods.App;
 
 public partial class App : System.Windows.Application
 {
+    private Mutex? _singleInstance;
+    private ulong? _address;
     private TrayIconHost? _tray;
     private PopupWindow? _popup;
     private LiveStateFeed? _feed;
@@ -23,6 +25,15 @@ public partial class App : System.Windows.Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        // One tray icon per user: a second launch must not create a second icon or a second
+        // watcher fighting over the radio.
+        _singleInstance = new Mutex(initiallyOwned: true, @"Local\HakoPods.SingleInstance", out var isFirst);
+        if (!isFirst)
+        {
+            Shutdown();
+            return;
+        }
 
         var logger = NullAppLogger.Instance;
         var settingsPath = Path.Combine(
@@ -40,6 +51,7 @@ public partial class App : System.Windows.Application
             settings = new AppSettings();
         }
 
+        _address = ParseAddress(settings.PreferredDeviceAddress);
         _native = new Win32BluetoothNative();
         _connection = new BluetoothConnectionManager(_native, logger);
 
@@ -61,6 +73,21 @@ public partial class App : System.Windows.Application
 
         // Development aid: `HakoPods.exe --demo-popup` renders the card once so the layout can be
         // inspected (and screenshotted) without waiting for a lid event.
+        if (e.Args.Contains("--demo-unknown", StringComparer.OrdinalIgnoreCase))
+        {
+            ShowPopup(new HakoPods.Core.State.DeviceState
+            {
+                ModelName = "AirPods Pro",
+                IsPresent = true,
+                LidOpen = true,
+                LeftBatteryPercent = null,
+                RightBatteryPercent = 5,
+                CaseBatteryPercent = null,
+                RightInEar = true,
+                LastSeenAt = DateTimeOffset.Now,
+            });
+        }
+
         if (e.Args.Contains("--demo-popup", StringComparer.OrdinalIgnoreCase))
         {
             ShowPopup(new HakoPods.Core.State.DeviceState
@@ -85,6 +112,9 @@ public partial class App : System.Windows.Application
             _feed.DisposeAsync().AsTask().GetAwaiter().GetResult();
         }
 
+        _singleInstance?.ReleaseMutex();
+        _singleInstance?.Dispose();
+
         _tray?.Dispose();
         _connection?.Dispose();
         _native?.Dispose();
@@ -108,7 +138,7 @@ public partial class App : System.Windows.Application
     private void ShowPopup(HakoPods.Core.State.DeviceState state)
     {
         _popup ??= new PopupWindow();
-        _popup.Apply(state, IsDarkTheme());
+        _popup.Apply(state, IsDarkTheme(), IsConnected());
         _popup.AccentBrush = AccentBrush();
 
         var cursor = System.Windows.Forms.Cursor.Position;
@@ -125,6 +155,15 @@ public partial class App : System.Windows.Application
 
         _popup.ShowAt(work, TaskbarEdge.Bottom);
     }
+
+    /// <summary>
+    /// True when the radio reports an active link to the configured pair. Device-level, not
+    /// per-profile, but with both profiles disabled on disconnect (APW-106) it is an honest
+    /// "Connected" signal for the status line.
+    /// </summary>
+    private bool IsConnected() =>
+        _address is { } address && _native is not null
+        && _native.TryGetDevice(address, out var snapshot) && snapshot.Connected;
 
     private static bool IsDarkTheme()
     {
