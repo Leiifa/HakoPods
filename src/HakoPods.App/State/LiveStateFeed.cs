@@ -19,13 +19,15 @@ public sealed class LiveStateFeed : IAsyncDisposable
     private readonly Dispatcher _dispatcher;
     private readonly DispatcherTimer _expiry;
     private readonly ulong? _address;
+    private readonly int _nearThresholdDbm;
     private CancellationTokenSource? _cancellation;
     private DeviceState _state = DeviceState.Empty;
     private bool _disposed;
 
-    public LiveStateFeed(ulong? address, Dispatcher dispatcher)
+    public LiveStateFeed(ulong? address, Dispatcher dispatcher, int nearThresholdDbm = -72)
     {
         _address = address;
+        _nearThresholdDbm = nearThresholdDbm;
         _dispatcher = dispatcher;
         _service = new ProximityPairingService(_watcher);
 
@@ -77,6 +79,14 @@ public sealed class LiveStateFeed : IAsyncDisposable
             {
                 // v1 is single-pair: ignore anything that is not the configured device, so a
                 // neighbour's AirPods cannot overwrite the tray.
+                // A neighbour's AirPods can advertise the same product id from the next desk.
+                // Distance is the only signal that separates them, so anything weaker than the
+                // measured near band is ignored entirely rather than becoming a popup.
+                if (sample.Rssi < _nearThresholdDbm)
+                {
+                    continue;
+                }
+
                 if (_address is { } wanted && sample.Address != wanted)
                 {
                     continue;

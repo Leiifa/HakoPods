@@ -67,7 +67,7 @@ public partial class App : System.Windows.Application
         // proximity-pairing adverts come from rotating random addresses (docs/research/IDENTITY.md),
         // so filtering on it would discard every packet. v1 accepts any Apple proximity-pairing
         // advert, which is correct while exactly one pair is in range.
-        _feed = new LiveStateFeed(address: null, Dispatcher);
+        _feed = new LiveStateFeed(address: null, Dispatcher, settings.NearThresholdDbm);
         _feed.StateChanged += (_, state) =>
         {
             _tray.ApplyState(state);
@@ -162,6 +162,11 @@ public partial class App : System.Windows.Application
             return;
         }
 
+        if (!IsOurPairedDevice())
+        {
+            return;
+        }
+
         if (IsFullscreenAppActive())
         {
             return;
@@ -170,6 +175,16 @@ public partial class App : System.Windows.Application
         _lastPopupAt = DateTimeOffset.UtcNow;
         ShowPopup(state);
     }
+
+    /// <summary>
+    /// The card is for the pair this PC knows, not for whatever AirPods happen to be on the desk.
+    /// Remembrance is the only identity the radio exposes for Classic devices.
+    /// </summary>
+    private bool IsOurPairedDevice() =>
+        _address is { } address
+        && _native is not null
+        && _native.TryGetDevice(address, out var snapshot)
+        && snapshot.Remembered;
 
     /// <summary>Shell tells us when a game or presentation owns the screen; do not interrupt it.</summary>
     private static bool IsFullscreenAppActive()
