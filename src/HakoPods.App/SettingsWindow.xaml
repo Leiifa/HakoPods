@@ -16,19 +16,19 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Margin="0,0,0,12">
-            <TextBlock Text="Playback device" FontSize="15" FontWeight="SemiBold" />
-            <TextBlock Text="Pick the device HakoPods should switch to when your AirPods connect."
+            <TextBlock Text="Audio output" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Text="Playback moves to your AirPods when they connect. Pick a device only if you want a different fallback."
                        FontSize="12" Foreground="#6E6E73" Margin="0,2,0,0" TextWrapping="Wrap" />
         </StackPanel>
 
         <ListBox x:Name="EndpointList" Grid.Row="1" DisplayMemberPath="Display" />
 
         <StackPanel Grid.Row="2" Margin="0,14,0,0">
-            <CheckBox x:Name="SwitchAudio" Content="Switch playback automatically on connect"
+            <CheckBox x:Name="SwitchAudio" Content="Move playback to my AirPods when they connect"
                       FontSize="13" Margin="0,0,0,8" />
-            <CheckBox x:Name="StartWithWindows" Content="Start with Windows"
+            <CheckBox x:Name="StartWithWindows" Content="Launch when I sign in"
                       FontSize="13" Margin="0,0,0,8" />
-            <CheckBox x:Name="AutoConnect" Content="Connect when the lid opens"
+            <CheckBox x:Name="AutoConnect" Content="Connect my AirPods when the lid opens"
                       FontSize="13" Margin="0,0,0,14" />
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
